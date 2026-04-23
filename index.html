@@ -1,109 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Carteras — CMA</title>
-
-  <!-- Libs -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#ffffff; --bg2:#f5f5f3; --bg3:#efefec;
-      --text:#1a1a18; --text2:#5f5e5a; --text3:#888780;
-      --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
-      --blue:#378ADD; --green:#1D9E75; --purple:#7F77DD;
-      --pink:#D4537E; --amber:#BA7517; --coral:#D85A30;
-      --teal:#185FA5; --olive:#639922; --wine:#993556;
-      --info-bg:#e6f1fb; --info-text:#0c447c; --info-border:#85b7eb;
-      --danger-bg:#fcebeb; --danger-text:#a32d2d; --danger-border:#f09595;
-      --warn-bg:#faeeda; --warn-text:#633806; --warn-border:#ef9f27;
-      --success-text:#0f6e56;
-      --r:8px; --rl:12px;
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --bg:#1c1c1a; --bg2:#252523; --bg3:#2e2e2b;
-        --text:#f0ede8; --text2:#a8a79f; --text3:#6e6d68;
-        --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.20);
-        --info-bg:#042c53; --info-text:#85b7eb; --info-border:#185fa5;
-        --danger-bg:#501313; --danger-text:#f09595; --danger-border:#a32d2d;
-        --warn-bg:#412402; --warn-text:#fac775; --warn-border:#ba7517;
-        --success-text:#5dcaa5;
-      }
-    }
-    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg3); color:var(--text); font-size:14px; }
-    #root { max-width:1200px; margin:0 auto; padding:1.5rem 1rem; }
-    h1 { font-size:20px; font-weight:500; margin-bottom:2px; }
-    .sub { font-size:12px; color:var(--text2); margin-bottom:16px; }
-    select,input { background:var(--bg); color:var(--text); border:0.5px solid var(--border2); border-radius:var(--r); padding:6px 10px; font-size:12px; outline:none; }
-    select:focus,input:focus { border-color:var(--info-border); }
-    button { background:transparent; color:var(--text2); border:0.5px solid var(--border2); border-radius:var(--r); padding:4px 10px; font-size:11px; cursor:pointer; }
-    button:hover { background:var(--bg2); }
-    table { border-collapse:collapse; width:100%; }
-    th,td { padding:5px 8px; text-align:left; font-size:12px; }
-    thead th { color:var(--text2); font-weight:500; border-bottom:0.5px solid var(--border); }
-    tbody tr { border-bottom:0.5px solid var(--border); }
-    tbody tr:nth-child(even) { background:var(--bg2); }
-    .card { background:var(--bg2); border-radius:var(--r); padding:12px 16px; }
-    .card-label { font-size:11px; color:var(--text2); margin-bottom:3px; }
-    .card-value { font-size:17px; font-weight:500; line-height:1.2; }
-    .card-sub { font-size:10px; color:var(--text3); margin-top:2px; }
-    .metrics { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-    .metrics .card { flex:1; min-width:0; }
-    .tab-bar { display:flex; border-bottom:0.5px solid var(--border); margin-bottom:18px; overflow-x:auto; }
-    .tab { background:none; border:none; border-bottom:2px solid transparent; padding:8px 12px; font-size:12px; cursor:pointer; white-space:nowrap; color:var(--text2); font-weight:400; }
-    .tab.active { border-bottom-color:var(--text); color:var(--text); font-weight:500; }
-    .chip { display:inline-flex; align-items:center; gap:4px; background:var(--info-bg); color:var(--info-text); border-radius:999px; padding:2px 10px; font-size:11px; }
-    .chip button { background:none; border:none; color:inherit; font-size:14px; padding:0; cursor:pointer; }
-    .alert { display:flex; align-items:flex-start; gap:8px; padding:8px 12px; border-radius:var(--r); margin-bottom:6px; font-size:12px; line-height:1.4; }
-    .alert.danger { background:var(--danger-bg); color:var(--danger-text); border:0.5px solid var(--danger-border); }
-    .alert.warn { background:var(--warn-bg); color:var(--warn-text); border:0.5px solid var(--warn-border); }
-    .filter-box { background:var(--bg2); border-radius:var(--rl); padding:12px 16px; margin-bottom:14px; border:0.5px solid var(--border); }
-    .grid2 { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; }
-    @media(max-width:640px){ .grid2 { grid-template-columns:1fr; } }
-    .section-title { font-size:13px; font-weight:500; margin-bottom:8px; }
-    .dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; display:inline-block; }
-    .legend { display:flex; flex-wrap:wrap; gap:3px 10px; margin-top:6px; }
-    .legend-item { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text2); cursor:pointer; }
-    .scroll-x { overflow-x:auto; }
-
-    /* Upload area */
-    .upload-area {
-      border:2px dashed var(--border2); border-radius:var(--rl); padding:3rem 2rem;
-      text-align:center; cursor:pointer; transition:border-color .2s;
-      background:var(--bg2);
-    }
-    .upload-area:hover, .upload-area.drag { border-color:var(--blue); background:var(--info-bg); }
-    .upload-icon { font-size:40px; margin-bottom:12px; }
-    .upload-title { font-size:16px; font-weight:500; margin-bottom:6px; }
-    .upload-sub { font-size:12px; color:var(--text2); }
-    .progress-bar { height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; margin-top:12px; }
-    .progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width .3s; }
-    .parse-log { font-size:11px; color:var(--text3); margin-top:8px; font-family:monospace; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard Carteras — CMA</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#efefec;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --blue:#378ADD;--green:#1D9E75;--purple:#7F77DD;
+  --pink:#D4537E;--amber:#BA7517;--coral:#D85A30;--teal:#185FA5;--olive:#639922;--wine:#993556;
+  --info-bg:#e6f1fb;--info-text:#0c447c;--info-border:#85b7eb;
+  --danger-bg:#fcebeb;--danger-text:#a32d2d;--danger-border:#f09595;
+  --warn-bg:#faeeda;--warn-text:#633806;--warn-border:#ef9f27;
+  --ok:#0f6e56;--r:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+  --text:#f0ede8;--text2:#a8a79f;--text3:#6e6d68;
+  --border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.20);
+  --info-bg:#042c53;--info-text:#85b7eb;--info-border:#185fa5;
+  --danger-bg:#501313;--danger-text:#f09595;--danger-border:#a32d2d;
+  --warn-bg:#412402;--warn-text:#fac775;--warn-border:#ba7517;
+  --ok:#5dcaa5;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--text);font-size:14px}
+#root{max-width:1200px;margin:0 auto;padding:1.5rem 1rem}
+h1{font-size:20px;font-weight:500;margin-bottom:2px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+select,input{background:var(--bg);color:var(--text);border:.5px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-size:12px;outline:none;width:100%}
+button{background:transparent;color:var(--text2);border:.5px solid var(--border2);border-radius:var(--r);padding:4px 10px;font-size:11px;cursor:pointer}
+button:hover{background:var(--bg2)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:5px 8px;text-align:left;font-size:12px}
+thead th{color:var(--text2);font-weight:500;border-bottom:.5px solid var(--border)}
+tbody tr{border-bottom:.5px solid var(--border)}
+tbody tr:nth-child(even){background:var(--bg2)}
+.card{background:var(--bg2);border-radius:var(--r);padding:12px 16px}
+.clabel{font-size:11px;color:var(--text2);margin-bottom:3px}
+.cval{font-size:17px;font-weight:500;line-height:1.2}
+.csub{font-size:10px;color:var(--text3);margin-top:2px}
+.metrics{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.metrics .card{flex:1;min-width:0}
+.tab-bar{display:flex;border-bottom:.5px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text2)}
+.tab.active{border-bottom-color:var(--text);color:var(--text);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--info-bg);color:var(--info-text);border-radius:999px;padding:2px 10px;font-size:11px}
+.chip button{background:none;border:none;color:inherit;font-size:14px;padding:0;cursor:pointer}
+.al{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:var(--r);margin-bottom:6px;font-size:12px;line-height:1.4}
+.al.danger{background:var(--danger-bg);color:var(--danger-text);border:.5px solid var(--danger-border)}
+.al.warn{background:var(--warn-bg);color:var(--warn-text);border:.5px solid var(--warn-border)}
+.fbox{background:var(--bg2);border-radius:var(--rl);padding:12px 16px;margin-bottom:14px;border:.5px solid var(--border)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media(max-width:640px){.g2{grid-template-columns:1fr}}
+.stitle{font-size:13px;font-weight:500;margin-bottom:8px}
+.dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block}
+.leg{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:6px}
+.legitem{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);cursor:pointer}
+.sx{overflow-x:auto}
+.upload{border:2px dashed var(--border2);border-radius:var(--rl);padding:3rem 2rem;text-align:center;cursor:pointer;background:var(--bg2)}
+.upload:hover,.upload.drag{border-color:var(--blue);background:var(--info-bg)}
+.upicon{font-size:40px;margin-bottom:12px}
+.uptitle{font-size:16px;font-weight:500;margin-bottom:6px}
+.upsub{font-size:12px;color:var(--text2)}
+.pbg{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:12px}
+.pfill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.plog{font-size:11px;color:var(--text3);margin-top:8px;font-family:monospace}
+.srow{cursor:pointer;user-select:none}
+.srow:hover{text-decoration:underline}
+</style>
 </head>
 <body>
 <div id="root"></div>
+<script>
+// ── globals ──────────────────────────────────────────────────────────────────
+const {createElement:h,useState,useMemo,useRef,useCallback,Fragment} = React;
+const RC = Recharts;
 
-<script type="text/babel">
-const { useState, useMemo, useRef, useCallback } = React;
-const { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
-        XAxis, YAxis, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend } = Recharts;
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 const FMT  = n => new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n);
 const PCT  = n => (n*100).toFixed(1)+"%";
 const FMT2 = n => n>=1e9?"$"+(n/1e9).toFixed(2)+"B":n>=1e6?"$"+(n/1e6).toFixed(1)+"M":FMT(n);
-const TOTAL_FN = rows => rows.reduce((s,r)=>s+r.ars,0);
+const SUM  = rows => rows.reduce((s,r)=>s+r.ars,0);
 
-const TIPO_COLORS = {
+const TC = {
   "Cash":"#378ADD","Acciones ARG":"#1D9E75","CEDEAR":"#7F77DD",
   "Acc. Exterior":"#D85A30","Bono Soberano":"#D4537E","ON":"#639922",
   "Tít. Provincial":"#185FA5","FCI":"#BA7517","Letra":"#993556",
@@ -111,895 +96,763 @@ const TIPO_COLORS = {
 };
 
 // ── PDF Parser ────────────────────────────────────────────────────────────────
-// El reporte CMA tiene secciones separadas por headers como:
-//   "Dólar"  →  "U$S - Dólar"  →  filas de comitente: "1234  56.789  56.789 ..."
-//   "Acciones / Pesos"  →  "GGAL - 534 / GRUPO FINANCIERO GALICIA"  →  filas de comitente
-// Parseamos línea a línea y mantenemos contexto de sección activa.
-
-const SECTION_MAP = {
-  "U$S - Dólar":"Cash:USD",
-  "U$S-C - Dólar Cable":"Cash:USD Cable",
-  "$ - Pesos":"Cash:ARS",
-  "Acciones / Dólar Cable":"Acc. Exterior:USD Cable",
-  "Acciones / Dólar":"Acc. Exterior:USD",
-  "Acciones / Pesos":"Acciones ARG:ARS",
-  "CEDEAR / Pesos":"CEDEAR:ARS",
-  "Fondos / Dólar":"FCI:USD",
-  "Fondos / Dólar Cable":"FCI:USD Cable",
-  "Fondos / Pesos":"FCI:ARS",
-  "Títulos Públicos / Dólar":"Tít. Público:USD",
-  "Títulos Públicos / Dólar Cable":"Tít. Público:USD Cable",
-  "Títulos Públicos / Pesos":"Tít. Público:ARS",
-  "Títulos Provinciales / Dólar":"Tít. Provincial:USD",
-  "Títulos Provinciales / Dólar Cable":"Tít. Provincial:USD Cable",
-  "Obligaciones Negociables / Dólar":"ON:USD",
-  "Obligaciones Negociables / Dólar Cable":"ON:USD Cable",
-  "Fideicomiso Financiero / Dólar":"FF:USD",
-  "Fideicomiso Financiero / Pesos":"FF:ARS",
-  "Futuros Rofex":"Futuro:ARS",
-  "Indices":"Futuro:ARS",
-  "LETRAS / Dólar Cable":"Letra:USD Cable",
-  "LETRAS / Pesos":"Letra:ARS",
-  "Acciones Exterior / Dólar":"Acc. Exterior:USD",
-  "Acciones Exterior / Dólar Cable":"Acc. Exterior:USD Cable",
+const SMAP = {
+  "U$S - Dólar":"Cash|USD",
+  "U$S-C - Dólar Cable":"Cash|USD Cable",
+  "$ - Pesos":"Cash|ARS",
+  "Acciones / Dólar Cable":"Acc. Exterior|USD Cable",
+  "Acciones / Dólar":"Acc. Exterior|USD",
+  "Acciones / Pesos":"Acciones ARG|ARS",
+  "Acciones Exterior / Dólar":"Acc. Exterior|USD",
+  "Acciones Exterior / Dólar Cable":"Acc. Exterior|USD Cable",
+  "CEDEAR / Pesos":"CEDEAR|ARS",
+  "Fondos / Dólar":"FCI|USD",
+  "Fondos / Dólar Cable":"FCI|USD Cable",
+  "Fondos / Pesos":"FCI|ARS",
+  "Títulos Públicos / Dólar":"Tít. Público|USD",
+  "Títulos Públicos / Dólar Cable":"Tít. Público|USD Cable",
+  "Títulos Públicos / Pesos":"Tít. Público|ARS",
+  "Títulos Provinciales / Dólar":"Tít. Provincial|USD",
+  "Títulos Provinciales / Dólar Cable":"Tít. Provincial|USD Cable",
+  "Obligaciones Negociables / Dólar":"ON|USD",
+  "Obligaciones Negociables / Dólar Cable":"ON|USD Cable",
+  "Fideicomiso Financiero / Dólar":"FF|USD",
+  "Fideicomiso Financiero / Pesos":"FF|ARS",
+  "Futuros Rofex":"Futuro|ARS",
+  "Indices":"Futuro|ARS",
+  "LETRAS / Dólar Cable":"Letra|USD Cable",
+  "LETRAS / Pesos":"Letra|ARS",
 };
 
-// Número argentino: "1.234.567,89" → 1234567.89
-const parseArgNum = s => {
-  if (!s) return 0;
-  const clean = String(s).replace(/\s/g,"").replace(/\./g,"").replace(",",".");
-  const v = parseFloat(clean);
-  return isNaN(v) ? 0 : v;
+const parseNum = s => {
+  const v = parseFloat(String(s||"").replace(/\s/g,"").replace(/\./g,"").replace(",","."));
+  return isNaN(v)?0:v;
 };
 
-// "Hoja N° 1 de 43" → true
-const isPageLine = s => /^Hoja\s+N°?\s*\d+/i.test(s.trim());
-
-// "GGAL - 534 / GRUPO FINANCIERO GALICIA" → {ticker:"GGAL", nombre:"Grupo Financiero Galicia"}
-const parseTickerLine = s => {
-  const m = s.match(/^([A-Z0-9\-\.]+)\s*-\s*[\d]+\s*\/\s*(.+)$/);
-  if (m) return { ticker: m[1].trim(), nombre: m[2].trim() };
-  // sin código numérico: "CMA DD D - CMA DOLAR DINAMICO CLASE D / CMA DD D"
-  const m2 = s.match(/^([A-Z0-9 ]+?)\s*-\s*.+\/\s*(.+)$/);
-  if (m2) return { ticker: m2[1].trim(), nombre: m2[2].trim() };
+const parseTicker = s => {
+  const m = s.match(/^([A-Z0-9][A-Z0-9 \-\.]{0,19}?)\s*-\s*\d+\s*\/\s*(.+)$/);
+  if(m) return {ticker:m[1].trim(), nombre:m[2].trim()};
   return null;
 };
 
-// Línea de comitente: empieza con número, luego valores numéricos
-// "1234  56.489,42  56.489,42  1,0000  56.489,42  09-04-2026  1.387,5000  78.379.072,50  0,46%"
-const parseComitenteLine = s => {
+const parseComLine = s => {
   const parts = s.trim().split(/\s{2,}|\t/);
-  if (parts.length < 3) return null;
-  const comitente = parts[0].trim();
-  if (!/^\d{3,7}$/.test(comitente)) return null;
-  // El importe en moneda local es la ante-penúltima o penúltima columna (antes del %)
-  // Estructura: comitente, disp, noDisp, total, cot_emision, importe_emision, fecha, cot_local, importe_local, %
-  // Buscamos el último número grande (importe local)
-  const nums = parts.slice(1).map(parseArgNum).filter(v => !isNaN(v));
-  // El importe local suele ser el mayor valor absoluto antes del último (que es el %)
-  // Tomamos el penúltimo número significativo
-  const significants = nums.filter(v => Math.abs(v) > 0.001);
-  if (significants.length < 2) return null;
-  const ars = significants[significants.length - 2]; // importe local ARS
-  return { comitente, ars };
+  if(parts.length < 3) return null;
+  const c = parts[0].trim();
+  if(!/^\d{3,7}$/.test(c)) return null;
+  const nums = parts.slice(1).map(parseNum).filter(v=>Math.abs(v)>0.0001);
+  if(nums.length < 2) return null;
+  return {comitente:c, ars: nums[nums.length-2]};
 };
 
-async function parsePDF(file, onProgress, onLog) {
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+async function parsePDF(file, onProg, onLog) {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const numPages = pdf.numPages;
-  onLog(`PDF cargado: ${numPages} páginas`);
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  const N = pdf.numPages;
+  onLog(`PDF cargado · ${N} páginas`);
 
   const rows = [];
-  let currentTipo = "Cash";
-  let currentMoneda = "USD";
-  let currentTicker = "USD";
-  let currentNombre = "Dólar disponible";
-  let inCashSection = false;
+  let tipo="Cash", moneda="USD", ticker="USD", nombre="Dólar disponible";
+  let isCash = true;
 
-  for (let p = 1; p <= numPages; p++) {
-    onProgress(Math.round((p / numPages) * 100));
+  for(let p=1;p<=N;p++){
+    onProg(Math.round(p/N*100));
     const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-
-    // Agrupar items por línea usando coordenadas Y
+    const ct = await page.getTextContent();
     const byY = {};
-    content.items.forEach(item => {
-      const y = Math.round(item.transform[5]);
-      if (!byY[y]) byY[y] = [];
-      byY[y].push(item.str);
+    ct.items.forEach(it=>{
+      const y=Math.round(it.transform[5]);
+      (byY[y]=byY[y]||[]).push(it.str);
     });
-    const lines = Object.keys(byY)
-      .sort((a,b) => b - a)
-      .map(y => byY[y].join(" ").trim())
-      .filter(l => l.length > 0);
+    const lines = Object.keys(byY).sort((a,b)=>b-a)
+      .map(y=>byY[y].join(" ").trim()).filter(l=>l);
 
-    for (const line of lines) {
-      if (isPageLine(line)) continue;
-      if (line.includes("Conforme las reglamentaciones")) continue;
-      if (line.includes("Reporte de Valuación")) continue;
-      if (line.includes("Visualización consolidada")) continue;
-      if (line.includes("Comitente") && line.includes("Tenencia")) continue;
-      if (line.includes("Disponible") && line.includes("No Disponible")) continue;
-      if (line.startsWith("Total :")) continue;
-      if (line.startsWith("Denominación") || line.startsWith("Importe Total")) continue;
+    for(const line of lines){
+      if(/^Hoja\s+N/i.test(line)) continue;
+      if(line.includes("Conforme las reglamentaciones")) continue;
+      if(line.includes("Reporte de Valuación")) continue;
+      if(line.includes("Visualización consolidada")) continue;
+      if(line.startsWith("Total :")) continue;
+      if(line.startsWith("Comitente") && line.includes("Tenencia")) continue;
+      if(line.startsWith("Disponible")) continue;
+      if(line.startsWith("Denominación")) continue;
 
-      // Detectar sección
-      const sectionMatch = Object.keys(SECTION_MAP).find(k =>
-        line.trim() === k || line.trim().startsWith(k)
-      );
-      if (sectionMatch) {
-        const [tipo, moneda] = SECTION_MAP[sectionMatch].split(":");
-        currentTipo = tipo;
-        currentMoneda = moneda;
-        inCashSection = tipo === "Cash";
-        if (inCashSection) {
-          currentTicker = moneda === "ARS" ? "ARS" : moneda === "USD Cable" ? "USD Cable" : "USD";
-          currentNombre = moneda === "ARS" ? "Pesos disponible" : moneda === "USD Cable" ? "Dólar Cable" : "Dólar disponible";
+      const sk = Object.keys(SMAP).find(k=>line.trim()===k||line.trim().startsWith(k+" "));
+      if(sk){
+        [tipo,moneda] = SMAP[sk].split("|");
+        isCash = tipo==="Cash";
+        if(isCash){
+          ticker = moneda==="ARS"?"ARS":moneda==="USD Cable"?"USD Cable":"USD";
+          nombre = moneda==="ARS"?"Pesos disponible":moneda==="USD Cable"?"Dólar Cable":"Dólar disponible";
         }
         continue;
       }
 
-      // Detectar ticker (solo cuando no estamos en sección Cash)
-      if (!inCashSection) {
-        const tk = parseTickerLine(line);
-        if (tk) {
-          currentTicker = tk.ticker;
-          currentNombre = tk.nombre;
-          continue;
-        }
+      if(!isCash){
+        const tk=parseTicker(line);
+        if(tk){ ticker=tk.ticker; nombre=tk.nombre; continue; }
       }
 
-      // Línea de comitente
-      const com = parseComitenteLine(line);
-      if (com && Math.abs(com.ars) > 0) {
-        rows.push({
-          comitente: com.comitente,
-          tipo: currentTipo,
-          moneda: currentMoneda,
-          ticker: currentTicker,
-          nombre: currentNombre,
-          ars: com.ars,
-        });
+      const com=parseComLine(line);
+      if(com && Math.abs(com.ars)>0){
+        rows.push({comitente:com.comitente,tipo,moneda,ticker,nombre,ars:com.ars});
       }
     }
   }
 
-  // Deduplicar (mismo comitente+ticker puede aparecer en múltiples páginas → conservar mayor)
-  const deduped = {};
-  rows.forEach(r => {
-    const key = `${r.comitente}|${r.ticker}|${r.tipo}`;
-    if (!deduped[key] || Math.abs(r.ars) > Math.abs(deduped[key].ars)) {
-      deduped[key] = r;
-    }
+  // dedup: mismo comitente+ticker → conservar mayor
+  const dd={};
+  rows.forEach(r=>{
+    const k=`${r.comitente}|${r.ticker}|${r.tipo}`;
+    if(!dd[k]||Math.abs(r.ars)>Math.abs(dd[k].ars)) dd[k]=r;
   });
-
-  const result = Object.values(deduped).filter(r => r.ars > 0);
-  onLog(`Parseadas ${result.length} posiciones de ${[...new Set(result.map(r=>r.comitente))].length} comitentes`);
+  const result = Object.values(dd).filter(r=>r.ars>0);
+  onLog(`Listo · ${result.length} posiciones · ${[...new Set(result.map(r=>r.comitente))].length} comitentes`);
   return result;
 }
 
-// ── Componentes UI ────────────────────────────────────────────────────────────
-const MetricCard = ({ label, value, sub, danger, warn }) => {
-  const bg = danger ? "var(--danger-bg)" : warn ? "var(--warn-bg)" : "var(--bg2)";
-  const col = danger ? "var(--danger-text)" : warn ? "var(--warn-text)" : "var(--text)";
-  return (
-    <div className="card" style={{ background: bg }}>
-      <div className="card-label">{label}</div>
-      <div className="card-value" style={{ color: col }}>{value}</div>
-      {sub && <div className="card-sub">{sub}</div>}
-    </div>
-  );
-};
-
-const AlertBadge = ({ level, text }) => (
-  <div className={`alert ${level}`}>
-    <span style={{ flexShrink: 0 }}>{level === "danger" ? "▲" : "●"}</span>
-    <span>{text}</span>
-  </div>
-);
-
-const CTip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
-  return (
-    <div style={{ background: "var(--bg)", border: "0.5px solid var(--border2)", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
-      <div style={{ fontWeight: 500 }}>{d.name || d.label || d.ticker || d.tipo || d.subject || ""}</div>
-      <div>{FMT(d.ars || d.value || payload[0].value || 0)}</div>
-    </div>
-  );
-};
-
-const TABS = ["Consolidado", "Alertas", "Comparativa", "Activos", "Comitentes", "Buscador"];
-
-// ── App principal ─────────────────────────────────────────────────────────────
-function App() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [log, setLog] = useState("");
-  const [drag, setDrag] = useState(false);
-  const fileRef = useRef();
-
-  const [tab, setTab] = useState("Consolidado");
-  const [fTipo, setFTipo] = useState("");
-  const [fMoneda, setFMoneda] = useState("");
-  const [fCom, setFCom] = useState("");
-  const [fTick, setFTick] = useState("");
-  const [sortCol, setSortCol] = useState("ars");
-  const [sortDir, setSortDir] = useState(-1);
-  const [searchTick, setSearchTick] = useState("");
-  const [searchCom, setSearchCom] = useState("");
-  const [cmpA, setCmpA] = useState("");
-  const [cmpB, setCmpB] = useState("");
-
-  const totalCartera = useMemo(() => TOTAL_FN(data), [data]);
-
-  const handleFile = useCallback(async file => {
-    if (!file || !file.name.endsWith(".pdf")) { alert("Por favor subí un archivo PDF."); return; }
-    setLoading(true); setProgress(0); setLog("Iniciando...");
-    try {
-      const rows = await parsePDF(file, setProgress, msg => setLog(msg));
-      setData(rows);
-      if (rows.length > 0) {
-        const coms = [...new Set(rows.map(r => r.comitente))].sort((a,b) => +a - +b);
-        setCmpA(coms[0] || ""); setCmpB(coms[1] || "");
-      }
-    } catch(e) { setLog("Error: " + e.message); console.error(e); }
-    setLoading(false);
-  }, []);
-
-  const onDrop = e => { e.preventDefault(); setDrag(false); handleFile(e.dataTransfer.files[0]); };
-
-  const ALL_TIPOS    = useMemo(() => [...new Set(data.map(r=>r.tipo))].sort(), [data]);
-  const ALL_MONEDAS  = useMemo(() => [...new Set(data.map(r=>r.moneda))].sort(), [data]);
-  const ALL_COMITENTES = useMemo(() => [...new Set(data.map(r=>r.comitente))].sort((a,b)=>+a-+b), [data]);
-  const ALL_TICKERS  = useMemo(() => [...new Set(data.map(r=>r.ticker))].sort(), [data]);
-
-  const filtered = useMemo(() => data.filter(r => {
-    if (fTipo && r.tipo !== fTipo) return false;
-    if (fMoneda && r.moneda !== fMoneda) return false;
-    if (fCom && r.comitente !== fCom) return false;
-    if (fTick && r.ticker !== fTick) return false;
-    return true;
-  }), [data, fTipo, fMoneda, fCom, fTick]);
-
-  const totalFilt = useMemo(() => TOTAL_FN(filtered), [filtered]);
-  const countCom  = useMemo(() => [...new Set(filtered.map(r=>r.comitente))].length, [filtered]);
-  const countTick = useMemo(() => [...new Set(filtered.map(r=>r.ticker))].length, [filtered]);
-
-  const byTipo = useMemo(() => {
-    const m = {};
-    filtered.forEach(r => { m[r.tipo] = (m[r.tipo]||0) + r.ars; });
-    return Object.entries(m).map(([tipo,ars]) => ({ tipo, name:tipo, ars, value:ars, pct:ars/totalCartera })).sort((a,b)=>b.ars-a.ars);
-  }, [filtered, totalCartera]);
-
-  const byTicker = useMemo(() => {
-    const m = {};
-    filtered.forEach(r => {
-      if (!m[r.ticker]) m[r.ticker] = { ticker:r.ticker, nombre:r.nombre, tipo:r.tipo, moneda:r.moneda, ars:0, coms:new Set() };
-      m[r.ticker].ars += r.ars; m[r.ticker].coms.add(r.comitente);
-    });
-    return Object.values(m).map(x => ({ ...x, nComs:x.coms.size })).sort((a,b) => {
-      const v = sortDir;
-      if (sortCol==="ars") return (b.ars-a.ars)*v;
-      if (sortCol==="ticker") return a.ticker.localeCompare(b.ticker)*v;
-      if (sortCol==="nComs") return (b.nComs-a.nComs)*v;
-      return 0;
-    });
-  }, [filtered, sortCol, sortDir]);
-
-  const byCom = useMemo(() => {
-    const m = {};
-    filtered.forEach(r => {
-      if (!m[r.comitente]) m[r.comitente] = { c:r.comitente, ars:0, ticks:new Set(), tipos:new Set() };
-      m[r.comitente].ars += r.ars; m[r.comitente].ticks.add(r.ticker); m[r.comitente].tipos.add(r.tipo);
-    });
-    return Object.values(m).map(x => ({ ...x, nTicks:x.ticks.size, nTipos:x.tipos.size })).sort((a,b)=>b.ars-a.ars);
-  }, [filtered]);
-
-  // Alertas
-  const alerts = useMemo(() => {
-    const res = [];
-    const cm = {};
-    data.filter(r=>r.ars>0).forEach(r => {
-      if (!cm[r.comitente]) cm[r.comitente] = { total:0, tickers:{}, tipos:{}, cash:0 };
-      cm[r.comitente].total += r.ars;
-      cm[r.comitente].tickers[r.ticker] = (cm[r.comitente].tickers[r.ticker]||0) + r.ars;
-      cm[r.comitente].tipos[r.tipo] = (cm[r.comitente].tipos[r.tipo]||0) + r.ars;
-      if (r.tipo==="Cash") cm[r.comitente].cash += r.ars;
-    });
-    Object.entries(cm).forEach(([c,d]) => {
-      if (d.total < 500000) return;
-      Object.entries(d.tickers).forEach(([tk,v]) => {
-        const p = v/d.total;
-        if (p >= 0.20) res.push({ level:"danger", com:c, text:`Comitente ${c}: concentración en ${tk} del ${(p*100).toFixed(0)}% (${FMT2(v)})`, pct:p, total:d.total });
-      });
-      Object.entries(d.tipos).forEach(([tp,v]) => {
-        const p = v/d.total;
-        if (p >= 0.50 && d.total>5e6) res.push({ level:"warn", com:c, text:`Comitente ${c}: ${(p*100).toFixed(0)}% en ${tp} (${FMT2(v)})`, pct:p, total:d.total });
-      });
-      const cp = d.cash/d.total;
-      if (cp >= 0.40 && d.total>5e6) res.push({ level:"warn", com:c, text:`Comitente ${c}: ${(cp*100).toFixed(0)}% en efectivo (${FMT2(d.cash)})`, pct:cp, total:d.total });
-      const nt = Object.keys(d.tickers).length;
-      if (nt <= 3 && d.total>5e6) res.push({ level:"warn", com:c, text:`Comitente ${c}: solo ${nt} instrumento${nt!==1?"s":""} — baja diversif. (${FMT2(d.total)})`, pct:0, total:d.total });
-    });
-    return res.sort((a,b) => (b.level==="danger"?1:0)-(a.level==="danger"?1:0)||(b.total-a.total));
-  }, [data]);
-
-  const dangerCount = alerts.filter(a=>a.level==="danger").length;
-  const warnCount   = alerts.filter(a=>a.level==="warn").length;
-
-  // Comparativa
-  const buildProfile = c => {
-    const rows = data.filter(r=>r.comitente===c&&r.ars>0);
-    const total = TOTAL_FN(rows);
-    const byT = {};
-    rows.forEach(r => { byT[r.tipo]=(byT[r.tipo]||0)+r.ars; });
-    const tipos = ["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"];
-    return {
-      total, rows, byT,
-      radar: tipos.map(t => ({ subject:t, value:Math.round(((byT[t]||0)/total)*100||0) })),
-      top5: [...rows].sort((a,b)=>b.ars-a.ars).slice(0,5),
-      nTick: [...new Set(rows.map(r=>r.ticker))].length,
-      cashPct: (byT["Cash"]||0)/total,
-    };
-  };
-  const profA = useMemo(() => cmpA ? buildProfile(cmpA) : null, [cmpA, data]);
-  const profB = useMemo(() => cmpB ? buildProfile(cmpB) : null, [cmpB, data]);
-  const radarData = useMemo(() => profA && profB
-    ? profA.radar.map((d,i) => ({ subject:d.subject, A:d.value, B:profB.radar[i]?.value||0 }))
-    : [], [profA, profB]);
-
-  // Buscador
-  const tickResults = useMemo(() => {
-    if (!searchTick.trim()) return [];
-    const q = searchTick.trim().toUpperCase();
-    const m = {};
-    data.filter(r=>r.ars>0&&(r.ticker.toUpperCase().includes(q)||r.nombre.toUpperCase().includes(q))).forEach(r => {
-      if (!m[r.comitente]) m[r.comitente] = { c:r.comitente, ars:0, items:[] };
-      m[r.comitente].ars += r.ars; m[r.comitente].items.push(r);
-    });
-    return Object.values(m).sort((a,b)=>b.ars-a.ars);
-  }, [searchTick, data]);
-
-  const comResults = useMemo(() => searchCom ? data.filter(r=>r.comitente===searchCom&&r.ars>0).sort((a,b)=>b.ars-a.ars) : [], [searchCom, data]);
-  const comTotal   = useMemo(() => TOTAL_FN(comResults), [comResults]);
-
-  const clearAll = () => { setFTipo(""); setFMoneda(""); setFCom(""); setFTick(""); };
-  const chips = [
-    fTipo   && { l:"Tipo: "+fTipo,     c:()=>setFTipo("") },
-    fMoneda && { l:"Moneda: "+fMoneda, c:()=>setFMoneda("") },
-    fCom    && { l:"Cte: "+fCom,       c:()=>setFCom("") },
-    fTick   && { l:"Ticker: "+fTick,   c:()=>setFTick("") },
-  ].filter(Boolean);
-
-  const SH = ({ col, lbl }) => (
-    <span className="sort-btn" onClick={() => { if(sortCol===col) setSortDir(d=>-d); else {setSortCol(col);setSortDir(-1);} }}
-      style={{ color: sortCol===col ? "var(--text)" : "var(--text2)" }}>
-      {lbl}{sortCol===col ? (sortDir===-1?" ↓":" ↑") : ""}
-    </span>
-  );
-
-  // ── Pantalla de carga ──
-  if (data.length === 0) {
-    return (
-      <div>
-        <h1>Dashboard Carteras</h1>
-        <p className="sub">Capital Markets Argentina — subí el reporte de valuación en PDF</p>
-        <div
-          className={`upload-area${drag?" drag":""}`}
-          onClick={() => fileRef.current.click()}
-          onDragOver={e=>{e.preventDefault();setDrag(true);}}
-          onDragLeave={()=>setDrag(false)}
-          onDrop={onDrop}
-        >
-          <div className="upload-icon">📄</div>
-          <div className="upload-title">Arrastrá el PDF acá o hacé click para seleccionarlo</div>
-          <div className="upload-sub">Reporte de Valuación CMA (.pdf) — funciona con cualquier fecha</div>
-          {loading && (
-            <div>
-              <div className="progress-bar"><div className="progress-fill" style={{width:progress+"%"}}/></div>
-              <div className="parse-log">{log}</div>
-            </div>
-          )}
-        </div>
-        <input ref={fileRef} type="file" accept=".pdf" style={{display:"none"}} onChange={e=>handleFile(e.target.files[0])}/>
-      </div>
-    );
-  }
-
-  // ── Dashboard ──
-  return (
-    <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:2, flexWrap:"wrap", gap:8 }}>
-        <div>
-          <h1>Dashboard Carteras</h1>
-          <p className="sub">Capital Markets Argentina · {data.length} posiciones · {ALL_COMITENTES.length} comitentes · Total: {FMT2(totalCartera)}</p>
-        </div>
-        <button onClick={() => { setData([]); setLog(""); setProgress(0); }}>
-          Cargar nuevo PDF
-        </button>
-      </div>
-
-      {/* Filtros */}
-      <div className="filter-box">
-        <div style={{ display:"flex", gap:10, flexWrap:"wrap", alignItems:"flex-end" }}>
-          {[["Tipo", ALL_TIPOS, fTipo, setFTipo], ["Moneda", ALL_MONEDAS, fMoneda, setFMoneda]].map(([lbl,opts,val,set]) => (
-            <div key={lbl} style={{ display:"flex", flexDirection:"column", gap:3, minWidth:120 }}>
-              <label style={{ fontSize:11, color:"var(--text2)" }}>{lbl}</label>
-              <select value={val} onChange={e=>set(e.target.value)}>
-                <option value="">Todos</option>
-                {opts.map(o=><option key={o} value={o}>{o}</option>)}
-              </select>
-            </div>
-          ))}
-          <div style={{ display:"flex", flexDirection:"column", gap:3, minWidth:120 }}>
-            <label style={{ fontSize:11, color:"var(--text2)" }}>Comitente</label>
-            <select value={fCom} onChange={e=>setFCom(e.target.value)}>
-              <option value="">Todos</option>
-              {ALL_COMITENTES.map(c=><option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", gap:3, minWidth:120 }}>
-            <label style={{ fontSize:11, color:"var(--text2)" }}>Ticker</label>
-            <select value={fTick} onChange={e=>setFTick(e.target.value)}>
-              <option value="">Todos</option>
-              {ALL_TICKERS.map(t=><option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          {chips.length > 0 && <button onClick={clearAll} style={{ alignSelf:"flex-end", height:30 }}>Limpiar</button>}
-        </div>
-        {chips.length > 0 && (
-          <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginTop:8 }}>
-            {chips.map((ch,i) => (
-              <span key={i} className="chip">{ch.l}<button onClick={ch.c}>×</button></span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Métricas */}
-      <div className="metrics">
-        <MetricCard label="Valuación filtrada" value={FMT2(totalFilt)} sub={totalCartera>0?`${((totalFilt/totalCartera)*100).toFixed(1)}% del total`:""}/>
-        <MetricCard label="Comitentes" value={countCom} sub="en la selección"/>
-        <MetricCard label="Instrumentos" value={countTick} sub="tickers únicos"/>
-        <MetricCard label="Alertas críticas" value={dangerCount} sub={`+ ${warnCount} advertencias`} danger={dangerCount>0} warn={dangerCount===0&&warnCount>0}/>
-      </div>
-
-      {/* Tabs */}
-      <div className="tab-bar">
-        {TABS.map(t => (
-          <button key={t} className={`tab${tab===t?" active":""}`} onClick={()=>setTab(t)}>
-            {t}{t==="Alertas"&&dangerCount>0?` (${dangerCount})`:""}
-          </button>
-        ))}
-      </div>
-
-      {/* ── CONSOLIDADO ── */}
-      {tab==="Consolidado" && (
-        <div>
-          <div className="grid2" style={{ marginBottom:20 }}>
-            <div>
-              <div className="section-title">Distribución por clase</div>
-              <ResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <Pie data={byTipo} dataKey="value" cx="50%" cy="50%" outerRadius={100} innerRadius={48} paddingAngle={1}>
-                    {byTipo.map(d=><Cell key={d.tipo} fill={TIPO_COLORS[d.tipo]||"#888"}/>)}
-                  </Pie>
-                  <Tooltip content={<CTip/>}/>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="legend">
-                {byTipo.map(d=>(
-                  <span key={d.tipo} className="legend-item" onClick={()=>setFTipo(d.tipo===fTipo?"":d.tipo)}
-                    style={{ fontWeight:fTipo===d.tipo?500:400, color:fTipo===d.tipo?"var(--text)":"var(--text2)" }}>
-                    <span className="dot" style={{ background:TIPO_COLORS[d.tipo]||"#888" }}/>
-                    {d.tipo} {PCT(d.pct)}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="section-title">Top 10 comitentes</div>
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={byCom.slice(0,10)} layout="vertical" margin={{left:4,right:16}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false}/>
-                  <XAxis type="number" tickFormatter={v=>"$"+(v/1e9).toFixed(1)+"B"} tick={{fontSize:9,fill:"var(--text3)"}}/>
-                  <YAxis type="category" dataKey="c" tick={{fontSize:10,fill:"var(--text3)"}} width={46}/>
-                  <Tooltip formatter={v=>[FMT(v),"ARS"]}/>
-                  <Bar dataKey="ars" fill="#378ADD" radius={[0,3,3,0]}
-                    onClick={d=>{setFCom(d.c===fCom?"":d.c);setTab("Activos");}}/>
-                </BarChart>
-              </ResponsiveContainer>
-              <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>Click en barra → filtrar y ver activos</div>
-            </div>
-          </div>
-          <div className="section-title">Resumen por clase</div>
-          <div className="scroll-x">
-            <table>
-              <thead><tr>{["Clase","Valuación ARS","% cartera","Posiciones","Comitentes"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {byTipo.map(d => {
-                  const rows = filtered.filter(r=>r.tipo===d.tipo&&r.ars>0);
-                  const coms = [...new Set(rows.map(r=>r.comitente))].length;
-                  return (
-                    <tr key={d.tipo} style={{cursor:"pointer"}} onClick={()=>setFTipo(d.tipo===fTipo?"":d.tipo)}>
-                      <td style={{display:"flex",alignItems:"center",gap:6}}>
-                        <span className="dot" style={{background:TIPO_COLORS[d.tipo]||"#888"}}/>{d.tipo}
-                      </td>
-                      <td style={{fontWeight:500}}>{FMT(d.ars)}</td>
-                      <td style={{color:"var(--text2)"}}>{PCT(d.pct)}</td>
-                      <td style={{color:"var(--text2)"}}>{rows.length}</td>
-                      <td style={{color:"var(--text2)"}}>{coms}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── ALERTAS ── */}
-      {tab==="Alertas" && (
-        <div>
-          <div className="metrics">
-            <MetricCard label="Alertas críticas" value={dangerCount} sub="Concentración > 20% en un activo" danger={dangerCount>0}/>
-            <MetricCard label="Advertencias" value={warnCount} sub="Concentración tipo, cash, diversif." warn={warnCount>0}/>
-            <MetricCard label="Comitentes analizados" value={byCom.length} sub="posición > $500k"/>
-          </div>
-          <div className="section-title" style={{color:"var(--danger-text)"}}>Concentración crítica — activo individual &gt; 20%</div>
-          {alerts.filter(a=>a.level==="danger").length===0
-            ? <p style={{fontSize:12,color:"var(--text2)",marginBottom:16}}>Sin alertas críticas.</p>
-            : alerts.filter(a=>a.level==="danger").map((a,i)=><AlertBadge key={i} level="danger" text={a.text}/>)
-          }
-          <div className="section-title" style={{color:"var(--warn-text)",marginTop:16}}>Advertencias</div>
-          {alerts.filter(a=>a.level==="warn").length===0
-            ? <p style={{fontSize:12,color:"var(--text2)"}}>Sin advertencias.</p>
-            : alerts.filter(a=>a.level==="warn").slice(0,40).map((a,i)=><AlertBadge key={i} level="warn" text={a.text}/>)
-          }
-          <div className="section-title" style={{marginTop:20}}>Top 10 — concentración máxima en un activo</div>
-          {(() => {
-            const cm2 = {};
-            data.filter(r=>r.ars>0).forEach(r => {
-              if (!cm2[r.comitente]) cm2[r.comitente] = { total:0, tickers:{} };
-              cm2[r.comitente].total += r.ars;
-              cm2[r.comitente].tickers[r.ticker] = (cm2[r.comitente].tickers[r.ticker]||0) + r.ars;
-            });
-            const top = Object.entries(cm2)
-              .filter(([,d])=>d.total>1e6)
-              .map(([c,d]) => { const e=Object.entries(d.tickers).sort((a,b)=>b[1]-a[1])[0]; return {c,pct:e[1]/d.total,ticker:e[0],ars:e[1],total:d.total}; })
-              .sort((a,b)=>b.pct-a.pct).slice(0,10);
-            return (
-              <div className="scroll-x">
-                <table>
-                  <thead><tr>{["Comitente","Activo","Concentración","Cartera total"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                  <tbody>{top.map((d,i)=>(
-                    <tr key={d.c}>
-                      <td style={{fontWeight:500}}>{d.c}</td>
-                      <td>{d.ticker}</td>
-                      <td>
-                        <div style={{display:"flex",alignItems:"center",gap:6}}>
-                          <div style={{width:60,height:5,borderRadius:2,background:"var(--bg3)",overflow:"hidden"}}>
-                            <div style={{width:`${Math.min(100,d.pct*100)}%`,height:"100%",borderRadius:2,
-                              background:d.pct>=0.5?"var(--danger-text)":d.pct>=0.2?"var(--warn-text)":"var(--success-text)"}}/>
-                          </div>
-                          <span style={{fontWeight:d.pct>=0.2?500:400,
-                            color:d.pct>=0.5?"var(--danger-text)":d.pct>=0.2?"var(--warn-text)":"var(--text)"}}>{(d.pct*100).toFixed(0)}%</span>
-                        </div>
-                      </td>
-                      <td style={{color:"var(--text2)"}}>{FMT2(d.total)}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* ── COMPARATIVA ── */}
-      {tab==="Comparativa" && (
-        <div>
-          <div style={{display:"flex",gap:12,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end"}}>
-            {[[cmpA,setCmpA,"#378ADD","Comitente A"],[cmpB,setCmpB,"#D4537E","Comitente B"]].map(([val,set,col,lbl])=>(
-              <div key={lbl} style={{display:"flex",flexDirection:"column",gap:3}}>
-                <label style={{fontSize:11,color:col,fontWeight:500}}>{lbl}</label>
-                <select value={val} onChange={e=>set(e.target.value)} style={{minWidth:140}}>
-                  <option value="">Seleccionar…</option>
-                  {ALL_COMITENTES.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            ))}
-          </div>
-          {profA && profB && (
-            <>
-              <div className="grid2" style={{marginBottom:16}}>
-                {[[profA,"#378ADD",cmpA,"A"],[profB,"#D4537E",cmpB,"B"]].map(([prof,col,c,lbl])=>(
-                  <div key={lbl} style={{background:"var(--bg2)",borderRadius:"var(--rl)",padding:"14px 16px"}}>
-                    <div style={{fontSize:12,color:col,fontWeight:500,marginBottom:10}}>Comitente {c}</div>
-                    <div className="metrics" style={{marginBottom:10}}>
-                      <MetricCard label="Total ARS" value={FMT2(prof.total)} sub=""/>
-                      <MetricCard label="Instr." value={prof.nTick} sub=""/>
-                      <MetricCard label="Cash" value={`${(prof.cashPct*100).toFixed(0)}%`} sub="" warn={prof.cashPct>0.4}/>
-                    </div>
-                    <div style={{fontSize:11,color:"var(--text2)",marginBottom:6}}>Top 5 posiciones</div>
-                    {prof.top5.map((r,i)=>(
-                      <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:11,padding:"3px 0",borderBottom:"0.5px solid var(--border)"}}>
-                        <span style={{display:"flex",alignItems:"center",gap:5}}>
-                          <span className="dot" style={{background:TIPO_COLORS[r.tipo]||"#888",width:6,height:6}}/>
-                          <span style={{fontWeight:500}}>{r.ticker}</span>
-                          <span style={{color:"var(--text3)"}}>{r.tipo}</span>
-                        </span>
-                        <span>{FMT2(r.ars)} <span style={{color:"var(--text3)"}}>{((r.ars/prof.total)*100).toFixed(0)}%</span></span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              <div className="section-title">Perfil de asignación — radar</div>
-              <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="var(--border2)"/>
-                  <PolarAngleAxis dataKey="subject" tick={{fontSize:10,fill:"var(--text2)"}}/>
-                  <Radar name={`Cte ${cmpA}`} dataKey="A" stroke="#378ADD" fill="#378ADD" fillOpacity={0.15}/>
-                  <Radar name={`Cte ${cmpB}`} dataKey="B" stroke="#D4537E" fill="#D4537E" fillOpacity={0.15}/>
-                  <Legend wrapperStyle={{fontSize:12}}/>
-                  <Tooltip formatter={(v,n)=>[v+"%",n]}/>
-                </RadarChart>
-              </ResponsiveContainer>
-              <div className="section-title" style={{marginTop:16}}>Diferencia por clase (pp)</div>
-              <div className="scroll-x">
-                <table>
-                  <thead><tr>{["Clase",`Cte ${cmpA}`,`Cte ${cmpB}`,"Diferencia"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                  <tbody>
-                    {["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"]
-                      .map(t => ({
-                        t,
-                        a: ((profA.byT[t]||0)/profA.total*100),
-                        b: ((profB.byT[t]||0)/profB.total*100),
-                      }))
-                      .filter(d=>d.a>0||d.b>0)
-                      .sort((a,b)=>Math.abs(b.a-b.b)-Math.abs(a.a-a.b))
-                      .map((d,i)=>{
-                        const delta = d.a - d.b;
-                        return (
-                          <tr key={d.t}>
-                            <td style={{display:"flex",alignItems:"center",gap:5}}>
-                              <span className="dot" style={{background:TIPO_COLORS[d.t]||"#888"}}/>{d.t}
-                            </td>
-                            <td style={{color:"#378ADD",fontWeight:500}}>{d.a.toFixed(1)}%</td>
-                            <td style={{color:"#D4537E",fontWeight:500}}>{d.b.toFixed(1)}%</td>
-                            <td style={{fontWeight:500,
-                              color:Math.abs(delta)>10?"var(--danger-text)":Math.abs(delta)>5?"var(--warn-text)":"var(--text2)"}}>
-                              {delta>0?"+":""}{delta.toFixed(1)}pp
-                            </td>
-                          </tr>
-                        );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ── ACTIVOS ── */}
-      {tab==="Activos" && (
-        <div>
-          <div className="section-title">{byTicker.length} instrumentos {fTipo&&`· ${fTipo}`}{fCom&&` · Cte ${fCom}`}</div>
-          <div className="scroll-x">
-            <table>
-              <thead><tr>
-                <th><SH col="ticker" lbl="Ticker"/></th>
-                <th style={{color:"var(--text2)",fontWeight:500}}>Nombre</th>
-                <th style={{color:"var(--text2)",fontWeight:500}}>Tipo</th>
-                <th style={{color:"var(--text2)",fontWeight:500}}>Moneda</th>
-                <th><SH col="ars" lbl="ARS"/></th>
-                <th><SH col="nComs" lbl="Ctes."/></th>
-                <th style={{color:"var(--text2)",fontWeight:500}}>% total</th>
-                <th></th>
-              </tr></thead>
-              <tbody>
-                {byTicker.map((d,i)=>(
-                  <tr key={d.ticker+i}>
-                    <td style={{fontWeight:500}}>{d.ticker}</td>
-                    <td style={{color:"var(--text2)",maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.nombre}</td>
-                    <td>
-                      <span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:11}}>
-                        <span className="dot" style={{background:TIPO_COLORS[d.tipo]||"#888",width:6,height:6}}/>{d.tipo}
-                      </span>
-                    </td>
-                    <td style={{fontSize:11,color:"var(--text2)"}}>{d.moneda}</td>
-                    <td>{FMT(d.ars)}</td>
-                    <td style={{textAlign:"center",color:"var(--text2)"}}>{d.nComs}</td>
-                    <td style={{color:"var(--text3)"}}>{totalCartera>0?((d.ars/totalCartera)*100).toFixed(2)+"%" : ""}</td>
-                    <td><button onClick={()=>setFTick(d.ticker===fTick?"":d.ticker)}>{d.ticker===fTick?"✓":"Filtrar"}</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── COMITENTES ── */}
-      {tab==="Comitentes" && (
-        <div>
-          <div className="grid2" style={{marginBottom:16}}>
-            <div>
-              <div className="section-title">Top 15 por valuación</div>
-              <ResponsiveContainer width="100%" height={340}>
-                <BarChart data={byCom.slice(0,15)} layout="vertical" margin={{left:4,right:16}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false}/>
-                  <XAxis type="number" tickFormatter={v=>"$"+(v/1e9).toFixed(1)+"B"} tick={{fontSize:9,fill:"var(--text3)"}}/>
-                  <YAxis type="category" dataKey="c" tick={{fontSize:10,fill:"var(--text3)"}} width={46}/>
-                  <Tooltip formatter={v=>[FMT(v),"ARS"]}/>
-                  <Bar dataKey="ars" fill="#1D9E75" radius={[0,3,3,0]} onClick={d=>setFCom(d.c===fCom?"":d.c)}/>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div>
-              <div className="section-title">Top 15 por diversificación</div>
-              <ResponsiveContainer width="100%" height={340}>
-                <BarChart data={[...byCom].sort((a,b)=>b.nTicks-a.nTicks).slice(0,15)} layout="vertical" margin={{left:4,right:16}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false}/>
-                  <XAxis type="number" tick={{fontSize:9,fill:"var(--text3)"}}/>
-                  <YAxis type="category" dataKey="c" tick={{fontSize:10,fill:"var(--text3)"}} width={46}/>
-                  <Tooltip formatter={v=>[v+" instrumentos","Diversif."]}/>
-                  <Bar dataKey="nTicks" fill="#7F77DD" radius={[0,3,3,0]}/>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="scroll-x">
-            <table>
-              <thead><tr>{["Comitente","Valuación ARS","% total","Instr.","Clases",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {byCom.map((d,i)=>(
-                  <tr key={d.c} style={{background:fCom===d.c?"var(--info-bg)":i%2===1?"var(--bg2)":"transparent"}}>
-                    <td style={{fontWeight:500}}>{d.c}</td>
-                    <td>
-                      <div style={{display:"flex",alignItems:"center",gap:6}}>
-                        <div style={{width:44,height:4,borderRadius:2,background:"var(--bg3)",overflow:"hidden",flexShrink:0}}>
-                          <div style={{width:`${Math.max(2,(d.ars/byCom[0].ars)*100)}%`,height:"100%",background:"#1D9E75",borderRadius:2}}/>
-                        </div>
-                        {FMT2(d.ars)}
-                      </div>
-                    </td>
-                    <td style={{color:"var(--text2)"}}>{totalCartera>0?((d.ars/totalCartera)*100).toFixed(2)+"%" : ""}</td>
-                    <td style={{textAlign:"center"}}>{d.nTicks}</td>
-                    <td style={{textAlign:"center"}}>{d.nTipos}</td>
-                    <td>
-                      <button onClick={()=>setFCom(d.c===fCom?"":d.c)}
-                        style={{background:fCom===d.c?"var(--info-bg)":"transparent",color:fCom===d.c?"var(--info-text)":"var(--text2)"}}>
-                        {fCom===d.c?"✓ Activo":"Ver"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── BUSCADOR ── */}
-      {tab==="Buscador" && (
-        <div className="grid2">
-          <div>
-            <div className="section-title">¿Qué clientes tienen este activo?</div>
-            <input value={searchTick} onChange={e=>setSearchTick(e.target.value)}
-              placeholder="Ticker o nombre… ej: SPY, GGAL, USD, YPF" style={{width:"100%",marginBottom:8}}/>
-            <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:10}}>
-              {["USD","USD Cable","SPY","MELI","AL35","VIST","GGAL","IRCPO"].map(tk=>(
-                <button key={tk} onClick={()=>setSearchTick(searchTick===tk?"":tk)}
-                  style={{fontSize:10,padding:"2px 8px",borderRadius:999,
-                    background:searchTick===tk?"var(--info-bg)":"var(--bg2)",
-                    color:searchTick===tk?"var(--info-text)":"var(--text2)"}}>
-                  {tk}
-                </button>
-              ))}
-            </div>
-            {searchTick.trim() && (
-              tickResults.length === 0
-                ? <p style={{fontSize:12,color:"var(--text3)"}}>Sin resultados para "{searchTick}"</p>
-                : <div>
-                    <div style={{fontSize:11,color:"var(--text2)",marginBottom:6}}>
-                      {tickResults.length} comitente{tickResults.length!==1?"s":""} · {FMT2(tickResults.reduce((s,r)=>s+r.ars,0))}
-                    </div>
-                    <div style={{maxHeight:400,overflowY:"auto"}}>
-                      {tickResults.map((d,i)=>(
-                        <div key={d.c} style={{padding:"7px 10px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:4,marginBottom:2,fontSize:12}}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                            <span style={{fontWeight:500}}>Comitente {d.c}</span>
-                            <span style={{color:"var(--text2)"}}>{FMT2(d.ars)}</span>
-                          </div>
-                          <div style={{display:"flex",flexWrap:"wrap",gap:3}}>
-                            {[...new Map(d.items.map(x=>[x.ticker,x])).values()].map(it=>(
-                              <span key={it.ticker} style={{fontSize:10,background:"var(--bg3)",border:"0.5px solid var(--border)",borderRadius:3,padding:"1px 5px",color:"var(--text2)"}}>
-                                {it.ticker} {FMT2(it.ars)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-            )}
-          </div>
-
-          <div>
-            <div className="section-title">Cartera de un comitente</div>
-            <select value={searchCom} onChange={e=>setSearchCom(e.target.value)} style={{width:"100%",marginBottom:12}}>
-              <option value="">Seleccionar comitente…</option>
-              {ALL_COMITENTES.map(c=><option key={c} value={c}>{c}</option>)}
-            </select>
-            {searchCom && comResults.length > 0 && (
-              <div>
-                <div className="metrics" style={{marginBottom:10}}>
-                  <MetricCard label="Total ARS" value={FMT2(comTotal)} sub={totalCartera>0?`${((comTotal/totalCartera)*100).toFixed(2)}% del libro`:""}/>
-                  <MetricCard label="Posiciones" value={comResults.length} sub="activos"/>
-                </div>
-                {(() => {
-                  const m = {};
-                  comResults.forEach(r=>{m[r.tipo]=(m[r.tipo]||0)+r.ars;});
-                  const pd = Object.entries(m).map(([tipo,ars])=>({tipo,name:tipo,value:ars})).sort((a,b)=>b.value-a.value);
-                  return (
-                    <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:10}}>
-                      <ResponsiveContainer width={90} height={90}>
-                        <PieChart>
-                          <Pie data={pd} dataKey="value" cx="50%" cy="50%" outerRadius={40} innerRadius={18} paddingAngle={1}>
-                            {pd.map(d=><Cell key={d.tipo} fill={TIPO_COLORS[d.tipo]||"#888"}/>)}
-                          </Pie>
-                          <Tooltip content={<CTip/>}/>
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                        {pd.map(d=>(
-                          <span key={d.tipo} style={{fontSize:10,display:"flex",alignItems:"center",gap:4,color:"var(--text2)"}}>
-                            <span className="dot" style={{background:TIPO_COLORS[d.tipo]||"#888",width:6,height:6}}/>
-                            {d.tipo} {((d.value/comTotal)*100).toFixed(0)}%
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-                <div style={{maxHeight:300,overflowY:"auto"}}>
-                  {comResults.map((r,i)=>(
-                    <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-                      padding:"5px 8px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:3,marginBottom:1,fontSize:12}}>
-                      <div style={{display:"flex",alignItems:"center",gap:6}}>
-                        <span className="dot" style={{background:TIPO_COLORS[r.tipo]||"#888",width:6,height:6}}/>
-                        <div>
-                          <span style={{fontWeight:500}}>{r.ticker}</span>
-                          <span style={{fontSize:10,color:"var(--text3)",marginLeft:5}}>{r.tipo} · {r.moneda}</span>
-                        </div>
-                      </div>
-                      <div style={{textAlign:"right"}}>
-                        <div>{FMT2(r.ars)}</div>
-                        <div style={{fontSize:10,color:"var(--text3)"}}>{((r.ars/comTotal)*100).toFixed(1)}%</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function MetricCard({label,value,sub,danger,warn}){
+  const bg = danger?"var(--danger-bg)":warn?"var(--warn-bg)":"var(--bg2)";
+  const col= danger?"var(--danger-text)":warn?"var(--warn-text)":"var(--text)";
+  return h("div",{className:"card",style:{background:bg}},
+    h("div",{className:"clabel"},label),
+    h("div",{className:"cval",style:{color:col}},value),
+    sub&&h("div",{className:"csub"},sub)
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+function AlertBadge({level,text}){
+  return h("div",{className:`al ${level}`},
+    h("span",{style:{flexShrink:0}},level==="danger"?"▲":"●"),
+    h("span",null,text)
+  );
+}
+
+function CTip({active,payload}){
+  if(!active||!payload?.length) return null;
+  const d=payload[0].payload;
+  return h("div",{style:{background:"var(--bg)",border:".5px solid var(--border2)",borderRadius:8,padding:"8px 12px",fontSize:12}},
+    h("div",{style:{fontWeight:500}},d.name||d.ticker||d.tipo||d.subject||""),
+    h("div",null,FMT(d.ars||d.value||payload[0].value||0))
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+const TABS=["Consolidado","Alertas","Comparativa","Activos","Comitentes","Buscador"];
+
+function App(){
+  const [data,setData]=useState([]);
+  const [loading,setLoading]=useState(false);
+  const [prog,setProg]=useState(0);
+  const [log,setLog]=useState("");
+  const [drag,setDrag]=useState(false);
+  const fileRef=useRef();
+
+  const [tab,setTab]=useState("Consolidado");
+  const [fTipo,setFTipo]=useState("");
+  const [fMon,setFMon]=useState("");
+  const [fCom,setFCom]=useState("");
+  const [fTick,setFTick]=useState("");
+  const [sCol,setSCol]=useState("ars");
+  const [sDir,setSDir]=useState(-1);
+  const [sTick,setSTick]=useState("");
+  const [sCom,setSCom]=useState("");
+  const [cmpA,setCmpA]=useState("");
+  const [cmpB,setCmpB]=useState("");
+
+  const total=useMemo(()=>SUM(data),[data]);
+
+  const handleFile=useCallback(async file=>{
+    if(!file||!file.name.endsWith(".pdf")){alert("Subí un PDF.");return;}
+    setLoading(true);setProg(0);setLog("Iniciando…");
+    try{
+      const rows=await parsePDF(file,setProg,setLog);
+      setData(rows);
+      if(rows.length){
+        const cs=[...new Set(rows.map(r=>r.comitente))].sort((a,b)=>+a-+b);
+        setCmpA(cs[0]||"");setCmpB(cs[1]||"");
+      }
+    }catch(e){setLog("Error: "+e.message);console.error(e);}
+    setLoading(false);
+  },[]);
+
+  const onDrop=e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0]);};
+
+  const TIPOS=useMemo(()=>[...new Set(data.map(r=>r.tipo))].sort(),[data]);
+  const MONS =useMemo(()=>[...new Set(data.map(r=>r.moneda))].sort(),[data]);
+  const COMS =useMemo(()=>[...new Set(data.map(r=>r.comitente))].sort((a,b)=>+a-+b),[data]);
+  const TICKS=useMemo(()=>[...new Set(data.map(r=>r.ticker))].sort(),[data]);
+
+  const fil=useMemo(()=>data.filter(r=>{
+    if(fTipo&&r.tipo!==fTipo)return false;
+    if(fMon&&r.moneda!==fMon)return false;
+    if(fCom&&r.comitente!==fCom)return false;
+    if(fTick&&r.ticker!==fTick)return false;
+    return true;
+  }),[data,fTipo,fMon,fCom,fTick]);
+
+  const totFil=useMemo(()=>SUM(fil),[fil]);
+  const nCom=useMemo(()=>[...new Set(fil.map(r=>r.comitente))].length,[fil]);
+  const nTick=useMemo(()=>[...new Set(fil.map(r=>r.ticker))].length,[fil]);
+
+  const byTipo=useMemo(()=>{
+    const m={};fil.forEach(r=>{m[r.tipo]=(m[r.tipo]||0)+r.ars;});
+    return Object.entries(m).map(([tipo,ars])=>({tipo,name:tipo,ars,value:ars,pct:ars/total})).sort((a,b)=>b.ars-a.ars);
+  },[fil,total]);
+
+  const byTicker=useMemo(()=>{
+    const m={};fil.forEach(r=>{
+      if(!m[r.ticker])m[r.ticker]={ticker:r.ticker,nombre:r.nombre,tipo:r.tipo,moneda:r.moneda,ars:0,cs:new Set()};
+      m[r.ticker].ars+=r.ars;m[r.ticker].cs.add(r.comitente);
+    });
+    return Object.values(m).map(x=>({...x,nC:x.cs.size})).sort((a,b)=>{
+      const v=sDir;
+      if(sCol==="ars")return(b.ars-a.ars)*v;
+      if(sCol==="ticker")return a.ticker.localeCompare(b.ticker)*v;
+      if(sCol==="nC")return(b.nC-a.nC)*v;
+      return 0;
+    });
+  },[fil,sCol,sDir]);
+
+  const byCom=useMemo(()=>{
+    const m={};fil.forEach(r=>{
+      if(!m[r.comitente])m[r.comitente]={c:r.comitente,ars:0,ts:new Set(),tp:new Set()};
+      m[r.comitente].ars+=r.ars;m[r.comitente].ts.add(r.ticker);m[r.comitente].tp.add(r.tipo);
+    });
+    return Object.values(m).map(x=>({...x,nT:x.ts.size,nP:x.tp.size})).sort((a,b)=>b.ars-a.ars);
+  },[fil]);
+
+  const alerts=useMemo(()=>{
+    const res=[],cm={};
+    data.filter(r=>r.ars>0).forEach(r=>{
+      if(!cm[r.comitente])cm[r.comitente]={total:0,tickers:{},tipos:{},cash:0};
+      cm[r.comitente].total+=r.ars;
+      cm[r.comitente].tickers[r.ticker]=(cm[r.comitente].tickers[r.ticker]||0)+r.ars;
+      cm[r.comitente].tipos[r.tipo]=(cm[r.comitente].tipos[r.tipo]||0)+r.ars;
+      if(r.tipo==="Cash")cm[r.comitente].cash+=r.ars;
+    });
+    Object.entries(cm).forEach(([c,d])=>{
+      if(d.total<500000)return;
+      Object.entries(d.tickers).forEach(([tk,v])=>{
+        const p=v/d.total;
+        if(p>=.20)res.push({level:"danger",text:`Comitente ${c}: ${(p*100).toFixed(0)}% en ${tk} (${FMT2(v)})`,total:d.total});
+      });
+      Object.entries(d.tipos).forEach(([tp,v])=>{
+        const p=v/d.total;
+        if(p>=.50&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: ${(p*100).toFixed(0)}% en ${tp} (${FMT2(v)})`,total:d.total});
+      });
+      const cp=d.cash/d.total;
+      if(cp>=.40&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: ${(cp*100).toFixed(0)}% en efectivo (${FMT2(d.cash)})`,total:d.total});
+      const nt=Object.keys(d.tickers).length;
+      if(nt<=3&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: solo ${nt} instrumento${nt!==1?"s":""} (${FMT2(d.total)})`,total:d.total});
+    });
+    return res.sort((a,b)=>(b.level==="danger"?1:0)-(a.level==="danger"?1:0)||(b.total-a.total));
+  },[data]);
+
+  const dCnt=alerts.filter(a=>a.level==="danger").length;
+  const wCnt=alerts.filter(a=>a.level==="warn").length;
+
+  const buildProf=c=>{
+    const rows=data.filter(r=>r.comitente===c&&r.ars>0);
+    const tot=SUM(rows);
+    const byT={};rows.forEach(r=>{byT[r.tipo]=(byT[r.tipo]||0)+r.ars;});
+    const tipos=["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"];
+    return{tot,rows,byT,
+      radar:tipos.map(t=>({subject:t,value:Math.round(((byT[t]||0)/tot)*100||0)})),
+      top5:[...rows].sort((a,b)=>b.ars-a.ars).slice(0,5),
+      nT:[...new Set(rows.map(r=>r.ticker))].length,
+      cashP:(byT["Cash"]||0)/tot
+    };
+  };
+  const pA=useMemo(()=>cmpA?buildProf(cmpA):null,[cmpA,data]);
+  const pB=useMemo(()=>cmpB?buildProf(cmpB):null,[cmpB,data]);
+  const radD=useMemo(()=>pA&&pB?pA.radar.map((d,i)=>({subject:d.subject,A:d.value,B:pB.radar[i]?.value||0})):[],[pA,pB]);
+
+  const tickRes=useMemo(()=>{
+    if(!sTick.trim())return[];
+    const q=sTick.trim().toUpperCase();
+    const m={};
+    data.filter(r=>r.ars>0&&(r.ticker.toUpperCase().includes(q)||r.nombre.toUpperCase().includes(q))).forEach(r=>{
+      if(!m[r.comitente])m[r.comitente]={c:r.comitente,ars:0,items:[]};
+      m[r.comitente].ars+=r.ars;m[r.comitente].items.push(r);
+    });
+    return Object.values(m).sort((a,b)=>b.ars-a.ars);
+  },[sTick,data]);
+
+  const comRes=useMemo(()=>sCom?data.filter(r=>r.comitente===sCom&&r.ars>0).sort((a,b)=>b.ars-a.ars):[],[sCom,data]);
+  const comTot=useMemo(()=>SUM(comRes),[comRes]);
+
+  const clearAll=()=>{setFTipo("");setFMon("");setFCom("");setFTick("");};
+  const chips=[
+    fTipo&&{l:"Tipo: "+fTipo,c:()=>setFTipo("")},
+    fMon&&{l:"Moneda: "+fMon,c:()=>setFMon("")},
+    fCom&&{l:"Cte: "+fCom,c:()=>setFCom("")},
+    fTick&&{l:"Ticker: "+fTick,c:()=>setFTick("")},
+  ].filter(Boolean);
+
+  const sh=(col,lbl)=>h("span",{className:"srow",
+    onClick:()=>{if(sCol===col)setSDir(d=>-d);else{setSCol(col);setSDir(-1);}},
+    style:{color:sCol===col?"var(--text)":"var(--text2)"}
+  },lbl+(sCol===col?(sDir===-1?" ↓":" ↑"):""));
+
+  // ── pantalla carga ──
+  if(!data.length){
+    return h(Fragment,null,
+      h("h1",null,"Dashboard Carteras"),
+      h("p",{className:"sub"},"Capital Markets Argentina — subí el reporte de valuación en PDF"),
+      h("div",{
+        className:"upload"+(drag?" drag":""),
+        onClick:()=>fileRef.current.click(),
+        onDragOver:e=>{e.preventDefault();setDrag(true);},
+        onDragLeave:()=>setDrag(false),
+        onDrop
+      },
+        h("div",{className:"upicon"},"📄"),
+        h("div",{className:"uptitle"},"Arrastrá el PDF acá o hacé click para seleccionarlo"),
+        h("div",{className:"upsub"},"Reporte de Valuación CMA (.pdf) — cualquier fecha"),
+        loading&&h(Fragment,null,
+          h("div",{className:"pbg"},h("div",{className:"pfill",style:{width:prog+"%"}})),
+          h("div",{className:"plog"},log)
+        )
+      ),
+      h("input",{ref:fileRef,type:"file",accept:".pdf",style:{display:"none"},onChange:e=>handleFile(e.target.files[0])})
+    );
+  }
+
+  // ── dashboard ──
+  const filterBox=h("div",{className:"fbox"},
+    h("div",{style:{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}},
+      ...[["Tipo",TIPOS,fTipo,setFTipo],["Moneda",MONS,fMon,setFMon]].map(([lbl,opts,val,set])=>
+        h("div",{key:lbl,style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+          h("label",{style:{fontSize:11,color:"var(--text2)"}},lbl),
+          h("select",{value:val,onChange:e=>set(e.target.value),style:{width:"auto"}},
+            h("option",{value:""},"Todos"),
+            ...opts.map(o=>h("option",{key:o,value:o},o))
+          )
+        )
+      ),
+      h("div",{style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+        h("label",{style:{fontSize:11,color:"var(--text2)"}},"Comitente"),
+        h("select",{value:fCom,onChange:e=>setFCom(e.target.value),style:{width:"auto"}},
+          h("option",{value:""},"Todos"),
+          ...COMS.map(c=>h("option",{key:c,value:c},c))
+        )
+      ),
+      h("div",{style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+        h("label",{style:{fontSize:11,color:"var(--text2)"}},"Ticker"),
+        h("select",{value:fTick,onChange:e=>setFTick(e.target.value),style:{width:"auto"}},
+          h("option",{value:""},"Todos"),
+          ...TICKS.map(t=>h("option",{key:t,value:t},t))
+        )
+      ),
+      chips.length&&h("button",{onClick:clearAll,style:{alignSelf:"flex-end",height:30}},"Limpiar")
+    ),
+    chips.length&&h("div",{style:{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}},
+      ...chips.map((ch,i)=>h("span",{key:i,className:"chip"},ch.l,h("button",{onClick:ch.c},"×")))
+    )
+  );
+
+  const metricsRow=h("div",{className:"metrics"},
+    h(MetricCard,{label:"Valuación filtrada",value:FMT2(totFil),sub:total>0?((totFil/total*100).toFixed(1)+"% del total"):""}),
+    h(MetricCard,{label:"Comitentes",value:nCom,sub:"en la selección"}),
+    h(MetricCard,{label:"Instrumentos",value:nTick,sub:"tickers únicos"}),
+    h(MetricCard,{label:"Alertas críticas",value:dCnt,sub:`+ ${wCnt} advertencias`,danger:dCnt>0,warn:dCnt===0&&wCnt>0})
+  );
+
+  const tabBar=h("div",{className:"tab-bar"},
+    ...TABS.map(t=>h("button",{key:t,className:"tab"+(tab===t?" active":""),onClick:()=>setTab(t)},
+      t+(t==="Alertas"&&dCnt>0?` (${dCnt})`:"")
+    ))
+  );
+
+  // contenido por tab
+  let content;
+
+  if(tab==="Consolidado"){
+    content=h(Fragment,null,
+      h("div",{className:"g2",style:{marginBottom:20}},
+        h("div",null,
+          h("div",{className:"stitle"},"Distribución por clase"),
+          h(RC.ResponsiveContainer,{width:"100%",height:240},
+            h(RC.PieChart,null,
+              h(RC.Pie,{data:byTipo,dataKey:"value",cx:"50%",cy:"50%",outerRadius:100,innerRadius:48,paddingAngle:1},
+                ...byTipo.map(d=>h(RC.Cell,{key:d.tipo,fill:TC[d.tipo]||"#888"}))
+              ),
+              h(RC.Tooltip,{content:h(CTip,null)})
+            )
+          ),
+          h("div",{className:"leg"},
+            ...byTipo.map(d=>h("span",{key:d.tipo,className:"legitem",
+              onClick:()=>setFTipo(d.tipo===fTipo?"":d.tipo),
+              style:{fontWeight:fTipo===d.tipo?500:400,color:fTipo===d.tipo?"var(--text)":"var(--text2)"}},
+              h("span",{className:"dot",style:{background:TC[d.tipo]||"#888"}}),
+              d.tipo+" "+PCT(d.pct)
+            ))
+          )
+        ),
+        h("div",null,
+          h("div",{className:"stitle"},"Top 10 comitentes"),
+          h(RC.ResponsiveContainer,{width:"100%",height:240},
+            h(RC.BarChart,{data:byCom.slice(0,10),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tickFormatter:v=>"$"+(v/1e9).toFixed(1)+"B",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[FMT(v),"ARS"]}),
+              h(RC.Bar,{dataKey:"ars",fill:"#378ADD",radius:[0,3,3,0],
+                onClick:d=>{setFCom(d.c===fCom?"":d.c);setTab("Activos");}})
+            )
+          ),
+          h("div",{style:{fontSize:10,color:"var(--text3)",marginTop:2}},"Click en barra → filtrar y ver activos")
+        )
+      ),
+      h("div",{className:"stitle"},"Resumen por clase"),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Clase","Valuación ARS","% cartera","Posiciones","Comitentes"].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...byTipo.map(d=>{
+            const rows=fil.filter(r=>r.tipo===d.tipo&&r.ars>0);
+            const coms=[...new Set(rows.map(r=>r.comitente))].length;
+            return h("tr",{key:d.tipo,style:{cursor:"pointer"},onClick:()=>setFTipo(d.tipo===fTipo?"":d.tipo)},
+              h("td",{style:{display:"flex",alignItems:"center",gap:6}},h("span",{className:"dot",style:{background:TC[d.tipo]||"#888"}}),d.tipo),
+              h("td",{style:{fontWeight:500}},FMT(d.ars)),
+              h("td",{style:{color:"var(--text2)"}},PCT(d.pct)),
+              h("td",{style:{color:"var(--text2)"}},rows.length),
+              h("td",{style:{color:"var(--text2)"}},coms)
+            );
+          }))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Alertas"){
+    const topConc=(()=>{
+      const cm2={};
+      data.filter(r=>r.ars>0).forEach(r=>{
+        if(!cm2[r.comitente])cm2[r.comitente]={total:0,tickers:{}};
+        cm2[r.comitente].total+=r.ars;
+        cm2[r.comitente].tickers[r.ticker]=(cm2[r.comitente].tickers[r.ticker]||0)+r.ars;
+      });
+      return Object.entries(cm2).filter(([,d])=>d.total>1e6).map(([c,d])=>{
+        const e=Object.entries(d.tickers).sort((a,b)=>b[1]-a[1])[0];
+        return{c,pct:e[1]/d.total,ticker:e[0],total:d.total};
+      }).sort((a,b)=>b.pct-a.pct).slice(0,10);
+    })();
+
+    content=h(Fragment,null,
+      h("div",{className:"metrics"},
+        h(MetricCard,{label:"Alertas críticas",value:dCnt,sub:"Concentración > 20% en un activo",danger:dCnt>0}),
+        h(MetricCard,{label:"Advertencias",value:wCnt,sub:"Concentración tipo, cash, diversif.",warn:wCnt>0}),
+        h(MetricCard,{label:"Comitentes analizados",value:byCom.length,sub:"posición > $500k"})
+      ),
+      h("div",{className:"stitle",style:{color:"var(--danger-text)"}},"Concentración crítica — activo individual > 20%"),
+      ...(!dCnt?[h("p",{style:{fontSize:12,color:"var(--text2)",marginBottom:16}},"Sin alertas críticas.")]:
+        alerts.filter(a=>a.level==="danger").map((a,i)=>h(AlertBadge,{key:i,...a}))),
+      h("div",{className:"stitle",style:{color:"var(--warn-text)",marginTop:16}},"Advertencias"),
+      ...(!wCnt?[h("p",{style:{fontSize:12,color:"var(--text2)"}},"Sin advertencias.")]:
+        alerts.filter(a=>a.level==="warn").slice(0,40).map((a,i)=>h(AlertBadge,{key:i,...a}))),
+      h("div",{className:"stitle",style:{marginTop:20}},"Top 10 — concentración máxima en un activo"),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Comitente","Activo","Concentración","Cartera total"].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...topConc.map((d,i)=>h("tr",{key:d.c},
+            h("td",{style:{fontWeight:500}},d.c),
+            h("td",null,d.ticker),
+            h("td",null,
+              h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                h("div",{style:{width:60,height:5,borderRadius:2,background:"var(--bg3)",overflow:"hidden"}},
+                  h("div",{style:{width:`${Math.min(100,d.pct*100)}%`,height:"100%",borderRadius:2,
+                    background:d.pct>=.5?"var(--danger-text)":d.pct>=.2?"var(--warn-text)":"var(--ok)"}})
+                ),
+                h("span",{style:{fontWeight:d.pct>=.2?500:400,
+                  color:d.pct>=.5?"var(--danger-text)":d.pct>=.2?"var(--warn-text)":"var(--text)"}},
+                  (d.pct*100).toFixed(0)+"%"
+                )
+              )
+            ),
+            h("td",{style:{color:"var(--text2)"}},FMT2(d.total))
+          )))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Comparativa"){
+    content=h(Fragment,null,
+      h("div",{style:{display:"flex",gap:12,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end"}},
+        ...[[cmpA,setCmpA,"#378ADD","Comitente A"],[cmpB,setCmpB,"#D4537E","Comitente B"]].map(([val,set,col,lbl])=>
+          h("div",{key:lbl,style:{display:"flex",flexDirection:"column",gap:3}},
+            h("label",{style:{fontSize:11,color:col,fontWeight:500}},lbl),
+            h("select",{value:val,onChange:e=>set(e.target.value),style:{minWidth:140,width:"auto"}},
+              h("option",{value:""},"Seleccionar…"),
+              ...COMS.map(c=>h("option",{key:c,value:c},c))
+            )
+          )
+        )
+      ),
+      pA&&pB&&h(Fragment,null,
+        h("div",{className:"g2",style:{marginBottom:16}},
+          ...[[pA,"#378ADD",cmpA],[pB,"#D4537E",cmpB]].map(([prof,col,c])=>
+            h("div",{key:c,style:{background:"var(--bg2)",borderRadius:"var(--rl)",padding:"14px 16px"}},
+              h("div",{style:{fontSize:12,color:col,fontWeight:500,marginBottom:10}},`Comitente ${c}`),
+              h("div",{className:"metrics",style:{marginBottom:10}},
+                h(MetricCard,{label:"Total ARS",value:FMT2(prof.tot),sub:""}),
+                h(MetricCard,{label:"Instr.",value:prof.nT,sub:""}),
+                h(MetricCard,{label:"Cash",value:`${(prof.cashP*100).toFixed(0)}%`,sub:"",warn:prof.cashP>.4})
+              ),
+              h("div",{style:{fontSize:11,color:"var(--text2)",marginBottom:6}},"Top 5 posiciones"),
+              ...prof.top5.map((r,i)=>
+                h("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,padding:"3px 0",borderBottom:".5px solid var(--border)"}},
+                  h("span",{style:{display:"flex",alignItems:"center",gap:5}},
+                    h("span",{className:"dot",style:{background:TC[r.tipo]||"#888",width:6,height:6}}),
+                    h("span",{style:{fontWeight:500}},r.ticker),
+                    h("span",{style:{color:"var(--text3)"}},r.tipo)
+                  ),
+                  h("span",null,FMT2(r.ars)," ",h("span",{style:{color:"var(--text3)"}},`${((r.ars/prof.tot)*100).toFixed(0)}%`))
+                )
+              )
+            )
+          )
+        ),
+        h("div",{className:"stitle"},"Perfil de asignación — radar"),
+        h(RC.ResponsiveContainer,{width:"100%",height:300},
+          h(RC.RadarChart,{data:radD},
+            h(RC.PolarGrid,{stroke:"var(--border2)"}),
+            h(RC.PolarAngleAxis,{dataKey:"subject",tick:{fontSize:10,fill:"var(--text2)"}}),
+            h(RC.Radar,{name:`Cte ${cmpA}`,dataKey:"A",stroke:"#378ADD",fill:"#378ADD",fillOpacity:.15}),
+            h(RC.Radar,{name:`Cte ${cmpB}`,dataKey:"B",stroke:"#D4537E",fill:"#D4537E",fillOpacity:.15}),
+            h(RC.Legend,{wrapperStyle:{fontSize:12}}),
+            h(RC.Tooltip,{formatter:(v,n)=>[v+"%",n]})
+          )
+        ),
+        h("div",{className:"stitle",style:{marginTop:16}},"Diferencia por clase (pp)"),
+        h("div",{className:"sx"},
+          h("table",null,
+            h("thead",null,h("tr",null,...["Clase",`Cte ${cmpA}`,`Cte ${cmpB}`,"Diferencia"].map(hd=>h("th",{key:hd},hd)))),
+            h("tbody",null,
+              ...["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"]
+                .map(t=>({t,a:(pA.byT[t]||0)/pA.tot*100,b:(pB.byT[t]||0)/pB.tot*100}))
+                .filter(d=>d.a>0||d.b>0)
+                .sort((a,b)=>Math.abs(b.a-b.b)-Math.abs(a.a-a.b))
+                .map((d,i)=>{
+                  const delta=d.a-d.b;
+                  return h("tr",{key:d.t},
+                    h("td",{style:{display:"flex",alignItems:"center",gap:5}},h("span",{className:"dot",style:{background:TC[d.t]||"#888"}}),d.t),
+                    h("td",{style:{color:"#378ADD",fontWeight:500}},d.a.toFixed(1)+"%"),
+                    h("td",{style:{color:"#D4537E",fontWeight:500}},d.b.toFixed(1)+"%"),
+                    h("td",{style:{fontWeight:500,color:Math.abs(delta)>10?"var(--danger-text)":Math.abs(delta)>5?"var(--warn-text)":"var(--text2)"}},
+                      (delta>0?"+":"")+delta.toFixed(1)+"pp")
+                  );
+                })
+            )
+          )
+        )
+      )
+    );
+  }
+
+  else if(tab==="Activos"){
+    content=h(Fragment,null,
+      h("div",{className:"stitle"},`${byTicker.length} instrumentos`),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,
+            h("th",null,sh("ticker","Ticker")),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Nombre"),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Tipo"),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Mon."),
+            h("th",null,sh("ars","ARS")),
+            h("th",null,sh("nC","Ctes.")),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"% total"),
+            h("th",null)
+          )),
+          h("tbody",null,...byTicker.map((d,i)=>
+            h("tr",{key:d.ticker+i},
+              h("td",{style:{fontWeight:500}},d.ticker),
+              h("td",{style:{color:"var(--text2)",maxWidth:150,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},d.nombre),
+              h("td",null,h("span",{style:{display:"inline-flex",alignItems:"center",gap:4,fontSize:11}},
+                h("span",{className:"dot",style:{background:TC[d.tipo]||"#888",width:6,height:6}}),d.tipo)),
+              h("td",{style:{fontSize:11,color:"var(--text2)"}},d.moneda),
+              h("td",null,FMT(d.ars)),
+              h("td",{style:{textAlign:"center",color:"var(--text2)"}},d.nC),
+              h("td",{style:{color:"var(--text3)"}},total>0?((d.ars/total)*100).toFixed(2)+"%":""),
+              h("td",null,h("button",{onClick:()=>setFTick(d.ticker===fTick?"":d.ticker)},d.ticker===fTick?"✓":"Filtrar"))
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Comitentes"){
+    content=h(Fragment,null,
+      h("div",{className:"g2",style:{marginBottom:16}},
+        h("div",null,
+          h("div",{className:"stitle"},"Top 15 por valuación"),
+          h(RC.ResponsiveContainer,{width:"100%",height:340},
+            h(RC.BarChart,{data:byCom.slice(0,15),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tickFormatter:v=>"$"+(v/1e9).toFixed(1)+"B",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[FMT(v),"ARS"]}),
+              h(RC.Bar,{dataKey:"ars",fill:"#1D9E75",radius:[0,3,3,0],onClick:d=>setFCom(d.c===fCom?"":d.c)})
+            )
+          )
+        ),
+        h("div",null,
+          h("div",{className:"stitle"},"Top 15 por diversificación"),
+          h(RC.ResponsiveContainer,{width:"100%",height:340},
+            h(RC.BarChart,{data:[...byCom].sort((a,b)=>b.nT-a.nT).slice(0,15),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[v+" instr.","Diversif."]}),
+              h(RC.Bar,{dataKey:"nT",fill:"#7F77DD",radius:[0,3,3,0]})
+            )
+          )
+        )
+      ),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Comitente","Valuación ARS","% total","Instr.","Clases",""].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...byCom.map((d,i)=>
+            h("tr",{key:d.c,style:{background:fCom===d.c?"var(--info-bg)":i%2===1?"var(--bg2)":"transparent"}},
+              h("td",{style:{fontWeight:500}},d.c),
+              h("td",null,
+                h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                  h("div",{style:{width:44,height:4,borderRadius:2,background:"var(--bg3)",overflow:"hidden",flexShrink:0}},
+                    h("div",{style:{width:`${Math.max(2,(d.ars/byCom[0].ars)*100)}%`,height:"100%",background:"#1D9E75",borderRadius:2}})
+                  ),
+                  FMT2(d.ars)
+                )
+              ),
+              h("td",{style:{color:"var(--text2)"}},total>0?((d.ars/total)*100).toFixed(2)+"%":""),
+              h("td",{style:{textAlign:"center"}},d.nT),
+              h("td",{style:{textAlign:"center"}},d.nP),
+              h("td",null,h("button",{
+                onClick:()=>setFCom(d.c===fCom?"":d.c),
+                style:{background:fCom===d.c?"var(--info-bg)":"transparent",color:fCom===d.c?"var(--info-text)":"var(--text2)"}
+              },fCom===d.c?"✓ Activo":"Ver"))
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Buscador"){
+    const comPie=(()=>{
+      const m={};comRes.forEach(r=>{m[r.tipo]=(m[r.tipo]||0)+r.ars;});
+      return Object.entries(m).map(([tipo,ars])=>({tipo,name:tipo,value:ars})).sort((a,b)=>b.value-a.value);
+    })();
+
+    content=h("div",{className:"g2"},
+      h("div",null,
+        h("div",{className:"stitle"},"¿Qué clientes tienen este activo?"),
+        h("input",{value:sTick,onChange:e=>setSTick(e.target.value),placeholder:"Ticker o nombre… ej: SPY, AL35, YPF, USD",style:{marginBottom:8}}),
+        h("div",{style:{display:"flex",flexWrap:"wrap",gap:5,marginBottom:10}},
+          ...["USD","USD Cable","SPY","MELI","AL35","VIST","GGAL","IRCPO"].map(tk=>
+            h("button",{key:tk,onClick:()=>setSTick(sTick===tk?"":tk),
+              style:{fontSize:10,padding:"2px 8px",borderRadius:999,
+                background:sTick===tk?"var(--info-bg)":"var(--bg2)",
+                color:sTick===tk?"var(--info-text)":"var(--text2)"}},tk)
+          )
+        ),
+        sTick.trim()&&(
+          !tickRes.length
+            ?h("p",{style:{fontSize:12,color:"var(--text3)"}},`Sin resultados para "${sTick}"`)
+            :h(Fragment,null,
+              h("div",{style:{fontSize:11,color:"var(--text2)",marginBottom:6}},
+                `${tickRes.length} comitente${tickRes.length!==1?"s":""} · ${FMT2(tickRes.reduce((s,r)=>s+r.ars,0))}`
+              ),
+              h("div",{style:{maxHeight:400,overflowY:"auto"}},
+                ...tickRes.map((d,i)=>
+                  h("div",{key:d.c,style:{padding:"7px 10px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:4,marginBottom:2,fontSize:12}},
+                    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
+                      h("span",{style:{fontWeight:500}},`Comitente ${d.c}`),
+                      h("span",{style:{color:"var(--text2)"}},FMT2(d.ars))
+                    ),
+                    h("div",{style:{display:"flex",flexWrap:"wrap",gap:3}},
+                      ...[...new Map(d.items.map(x=>[x.ticker,x])).values()].map(it=>
+                        h("span",{key:it.ticker,style:{fontSize:10,background:"var(--bg3)",border:".5px solid var(--border)",borderRadius:3,padding:"1px 5px",color:"var(--text2)"}},
+                          `${it.ticker} ${FMT2(it.ars)}`)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+        )
+      ),
+      h("div",null,
+        h("div",{className:"stitle"},"Cartera de un comitente"),
+        h("select",{value:sCom,onChange:e=>setSCom(e.target.value),style:{marginBottom:12}},
+          h("option",{value:""},"Seleccionar comitente…"),
+          ...COMS.map(c=>h("option",{key:c,value:c},c))
+        ),
+        sCom&&comRes.length>0&&h(Fragment,null,
+          h("div",{className:"metrics",style:{marginBottom:10}},
+            h(MetricCard,{label:"Total ARS",value:FMT2(comTot),sub:total>0?`${((comTot/total)*100).toFixed(2)}% del libro`:""}),
+            h(MetricCard,{label:"Posiciones",value:comRes.length,sub:"activos"})
+          ),
+          comPie.length>0&&h("div",{style:{display:"flex",gap:12,alignItems:"center",marginBottom:10}},
+            h(RC.ResponsiveContainer,{width:90,height:90},
+              h(RC.PieChart,null,
+                h(RC.Pie,{data:comPie,dataKey:"value",cx:"50%",cy:"50%",outerRadius:40,innerRadius:18,paddingAngle:1},
+                  ...comPie.map(d=>h(RC.Cell,{key:d.tipo,fill:TC[d.tipo]||"#888"}))
+                ),
+                h(RC.Tooltip,{content:h(CTip,null)})
+              )
+            ),
+            h("div",{style:{display:"flex",flexDirection:"column",gap:3}},
+              ...comPie.map(d=>h("span",{key:d.tipo,style:{fontSize:10,display:"flex",alignItems:"center",gap:4,color:"var(--text2)"}},
+                h("span",{className:"dot",style:{background:TC[d.tipo]||"#888",width:6,height:6}}),
+                `${d.tipo} ${((d.value/comTot)*100).toFixed(0)}%`
+              ))
+            )
+          ),
+          h("div",{style:{maxHeight:300,overflowY:"auto"}},
+            ...comRes.map((r,i)=>
+              h("div",{key:i,style:{display:"flex",justifyContent:"space-between",alignItems:"center",
+                padding:"5px 8px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:3,marginBottom:1,fontSize:12}},
+                h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                  h("span",{className:"dot",style:{background:TC[r.tipo]||"#888",width:6,height:6}}),
+                  h("div",null,
+                    h("span",{style:{fontWeight:500}},r.ticker),
+                    h("span",{style:{fontSize:10,color:"var(--text3)",marginLeft:5}},`${r.tipo} · ${r.moneda}`)
+                  )
+                ),
+                h("div",{style:{textAlign:"right"}},
+                  h("div",null,FMT2(r.ars)),
+                  h("div",{style:{fontSize:10,color:"var(--text3)"}},`${((r.ars/comTot)*100).toFixed(1)}%`)
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
+  return h(Fragment,null,
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2,flexWrap:"wrap",gap:8}},
+      h("div",null,
+        h("h1",null,"Dashboard Carteras"),
+        h("p",{className:"sub"},`Capital Markets Argentina · ${data.length} posiciones · ${COMS.length} comitentes · Total: ${FMT2(total)}`)
+      ),
+      h("button",{onClick:()=>{setData([]);setLog("");setProg(0);}},"Cargar nuevo PDF")
+    ),
+    filterBox,
+    metricsRow,
+    tabBar,
+    content
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(h(App,null));
 </script>
 </body>
 </html>

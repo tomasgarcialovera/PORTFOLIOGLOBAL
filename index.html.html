@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard Carteras — CMA</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#efefec;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --blue:#378ADD;--green:#1D9E75;--purple:#7F77DD;
+  --pink:#D4537E;--amber:#BA7517;--coral:#D85A30;--teal:#185FA5;--olive:#639922;--wine:#993556;
+  --info-bg:#e6f1fb;--info-text:#0c447c;--info-border:#85b7eb;
+  --danger-bg:#fcebeb;--danger-text:#a32d2d;--danger-border:#f09595;
+  --warn-bg:#faeeda;--warn-text:#633806;--warn-border:#ef9f27;
+  --ok:#0f6e56;--r:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+  --text:#f0ede8;--text2:#a8a79f;--text3:#6e6d68;
+  --border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.20);
+  --info-bg:#042c53;--info-text:#85b7eb;--info-border:#185fa5;
+  --danger-bg:#501313;--danger-text:#f09595;--danger-border:#a32d2d;
+  --warn-bg:#412402;--warn-text:#fac775;--warn-border:#ba7517;
+  --ok:#5dcaa5;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--text);font-size:14px}
+#root{max-width:1200px;margin:0 auto;padding:1.5rem 1rem}
+h1{font-size:20px;font-weight:500;margin-bottom:2px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+select,input{background:var(--bg);color:var(--text);border:.5px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-size:12px;outline:none;width:100%}
+button{background:transparent;color:var(--text2);border:.5px solid var(--border2);border-radius:var(--r);padding:4px 10px;font-size:11px;cursor:pointer}
+button:hover{background:var(--bg2)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:5px 8px;text-align:left;font-size:12px}
+thead th{color:var(--text2);font-weight:500;border-bottom:.5px solid var(--border)}
+tbody tr{border-bottom:.5px solid var(--border)}
+tbody tr:nth-child(even){background:var(--bg2)}
+.card{background:var(--bg2);border-radius:var(--r);padding:12px 16px}
+.clabel{font-size:11px;color:var(--text2);margin-bottom:3px}
+.cval{font-size:17px;font-weight:500;line-height:1.2}
+.csub{font-size:10px;color:var(--text3);margin-top:2px}
+.metrics{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.metrics .card{flex:1;min-width:0}
+.tab-bar{display:flex;border-bottom:.5px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text2)}
+.tab.active{border-bottom-color:var(--text);color:var(--text);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--info-bg);color:var(--info-text);border-radius:999px;padding:2px 10px;font-size:11px}
+.chip button{background:none;border:none;color:inherit;font-size:14px;padding:0;cursor:pointer}
+.al{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:var(--r);margin-bottom:6px;font-size:12px;line-height:1.4}
+.al.danger{background:var(--danger-bg);color:var(--danger-text);border:.5px solid var(--danger-border)}
+.al.warn{background:var(--warn-bg);color:var(--warn-text);border:.5px solid var(--warn-border)}
+.fbox{background:var(--bg2);border-radius:var(--rl);padding:12px 16px;margin-bottom:14px;border:.5px solid var(--border)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media(max-width:640px){.g2{grid-template-columns:1fr}}
+.stitle{font-size:13px;font-weight:500;margin-bottom:8px}
+.dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block}
+.leg{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:6px}
+.legitem{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);cursor:pointer}
+.sx{overflow-x:auto}
+.upload{border:2px dashed var(--border2);border-radius:var(--rl);padding:3rem 2rem;text-align:center;cursor:pointer;background:var(--bg2)}
+.upload:hover,.upload.drag{border-color:var(--blue);background:var(--info-bg)}
+.upicon{font-size:40px;margin-bottom:12px}
+.uptitle{font-size:16px;font-weight:500;margin-bottom:6px}
+.upsub{font-size:12px;color:var(--text2)}
+.pbg{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:12px}
+.pfill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.plog{font-size:11px;color:var(--text3);margin-top:8px;font-family:monospace}
+.srow{cursor:pointer;user-select:none}
+.srow:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ── globals ──────────────────────────────────────────────────────────────────
+const {createElement:h,useState,useMemo,useRef,useCallback,Fragment} = React;
+const RC = Recharts;
+
+const FMT  = n => new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n);
+const PCT  = n => (n*100).toFixed(1)+"%";
+const FMT2 = n => n>=1e9?"$"+(n/1e9).toFixed(2)+"B":n>=1e6?"$"+(n/1e6).toFixed(1)+"M":FMT(n);
+const SUM  = rows => rows.reduce((s,r)=>s+r.ars,0);
+
+const TC = {
+  "Cash":"#378ADD","Acciones ARG":"#1D9E75","CEDEAR":"#7F77DD",
+  "Acc. Exterior":"#D85A30","Bono Soberano":"#D4537E","ON":"#639922",
+  "Tít. Provincial":"#185FA5","FCI":"#BA7517","Letra":"#993556",
+  "Tít. Público":"#0F6E56","FF":"#3C3489","Futuro":"#888780",
+};
+
+// ── PDF Parser ────────────────────────────────────────────────────────────────
+const SMAP = {
+  "U$S - Dólar":"Cash|USD",
+  "U$S-C - Dólar Cable":"Cash|USD Cable",
+  "$ - Pesos":"Cash|ARS",
+  "Acciones / Dólar Cable":"Acc. Exterior|USD Cable",
+  "Acciones / Dólar":"Acc. Exterior|USD",
+  "Acciones / Pesos":"Acciones ARG|ARS",
+  "Acciones Exterior / Dólar":"Acc. Exterior|USD",
+  "Acciones Exterior / Dólar Cable":"Acc. Exterior|USD Cable",
+  "CEDEAR / Pesos":"CEDEAR|ARS",
+  "Fondos / Dólar":"FCI|USD",
+  "Fondos / Dólar Cable":"FCI|USD Cable",
+  "Fondos / Pesos":"FCI|ARS",
+  "Títulos Públicos / Dólar":"Tít. Público|USD",
+  "Títulos Públicos / Dólar Cable":"Tít. Público|USD Cable",
+  "Títulos Públicos / Pesos":"Tít. Público|ARS",
+  "Títulos Provinciales / Dólar":"Tít. Provincial|USD",
+  "Títulos Provinciales / Dólar Cable":"Tít. Provincial|USD Cable",
+  "Obligaciones Negociables / Dólar":"ON|USD",
+  "Obligaciones Negociables / Dólar Cable":"ON|USD Cable",
+  "Fideicomiso Financiero / Dólar":"FF|USD",
+  "Fideicomiso Financiero / Pesos":"FF|ARS",
+  "Futuros Rofex":"Futuro|ARS",
+  "Indices":"Futuro|ARS",
+  "LETRAS / Dólar Cable":"Letra|USD Cable",
+  "LETRAS / Pesos":"Letra|ARS",
+};
+
+const parseNum = s => {
+  const v = parseFloat(String(s||"").replace(/\s/g,"").replace(/\./g,"").replace(",","."));
+  return isNaN(v)?0:v;
+};
+
+const parseTicker = s => {
+  const m = s.match(/^([A-Z0-9][A-Z0-9 \-\.]{0,19}?)\s*-\s*\d+\s*\/\s*(.+)$/);
+  if(m) return {ticker:m[1].trim(), nombre:m[2].trim()};
+  return null;
+};
+
+const parseComLine = s => {
+  const parts = s.trim().split(/\s{2,}|\t/);
+  if(parts.length < 3) return null;
+  const c = parts[0].trim();
+  if(!/^\d{3,7}$/.test(c)) return null;
+  const nums = parts.slice(1).map(parseNum).filter(v=>Math.abs(v)>0.0001);
+  if(nums.length < 2) return null;
+  return {comitente:c, ars: nums[nums.length-2]};
+};
+
+async function parsePDF(file, onProg, onLog) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  const N = pdf.numPages;
+  onLog(`PDF cargado · ${N} páginas`);
+
+  const rows = [];
+  let tipo="Cash", moneda="USD", ticker="USD", nombre="Dólar disponible";
+  let isCash = true;
+
+  for(let p=1;p<=N;p++){
+    onProg(Math.round(p/N*100));
+    const page = await pdf.getPage(p);
+    const ct = await page.getTextContent();
+    const byY = {};
+    ct.items.forEach(it=>{
+      const y=Math.round(it.transform[5]);
+      (byY[y]=byY[y]||[]).push(it.str);
+    });
+    const lines = Object.keys(byY).sort((a,b)=>b-a)
+      .map(y=>byY[y].join(" ").trim()).filter(l=>l);
+
+    for(const line of lines){
+      if(/^Hoja\s+N/i.test(line)) continue;
+      if(line.includes("Conforme las reglamentaciones")) continue;
+      if(line.includes("Reporte de Valuación")) continue;
+      if(line.includes("Visualización consolidada")) continue;
+      if(line.startsWith("Total :")) continue;
+      if(line.startsWith("Comitente") && line.includes("Tenencia")) continue;
+      if(line.startsWith("Disponible")) continue;
+      if(line.startsWith("Denominación")) continue;
+
+      const sk = Object.keys(SMAP).find(k=>line.trim()===k||line.trim().startsWith(k+" "));
+      if(sk){
+        [tipo,moneda] = SMAP[sk].split("|");
+        isCash = tipo==="Cash";
+        if(isCash){
+          ticker = moneda==="ARS"?"ARS":moneda==="USD Cable"?"USD Cable":"USD";
+          nombre = moneda==="ARS"?"Pesos disponible":moneda==="USD Cable"?"Dólar Cable":"Dólar disponible";
+        }
+        continue;
+      }
+
+      if(!isCash){
+        const tk=parseTicker(line);
+        if(tk){ ticker=tk.ticker; nombre=tk.nombre; continue; }
+      }
+
+      const com=parseComLine(line);
+      if(com && Math.abs(com.ars)>0){
+        rows.push({comitente:com.comitente,tipo,moneda,ticker,nombre,ars:com.ars});
+      }
+    }
+  }
+
+  // dedup: mismo comitente+ticker → conservar mayor
+  const dd={};
+  rows.forEach(r=>{
+    const k=`${r.comitente}|${r.ticker}|${r.tipo}`;
+    if(!dd[k]||Math.abs(r.ars)>Math.abs(dd[k].ars)) dd[k]=r;
+  });
+  const result = Object.values(dd).filter(r=>r.ars>0);
+  onLog(`Listo · ${result.length} posiciones · ${[...new Set(result.map(r=>r.comitente))].length} comitentes`);
+  return result;
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function MetricCard({label,value,sub,danger,warn}){
+  const bg = danger?"var(--danger-bg)":warn?"var(--warn-bg)":"var(--bg2)";
+  const col= danger?"var(--danger-text)":warn?"var(--warn-text)":"var(--text)";
+  return h("div",{className:"card",style:{background:bg}},
+    h("div",{className:"clabel"},label),
+    h("div",{className:"cval",style:{color:col}},value),
+    sub&&h("div",{className:"csub"},sub)
+  );
+}
+
+function AlertBadge({level,text}){
+  return h("div",{className:`al ${level}`},
+    h("span",{style:{flexShrink:0}},level==="danger"?"▲":"●"),
+    h("span",null,text)
+  );
+}
+
+function CTip({active,payload}){
+  if(!active||!payload?.length) return null;
+  const d=payload[0].payload;
+  return h("div",{style:{background:"var(--bg)",border:".5px solid var(--border2)",borderRadius:8,padding:"8px 12px",fontSize:12}},
+    h("div",{style:{fontWeight:500}},d.name||d.ticker||d.tipo||d.subject||""),
+    h("div",null,FMT(d.ars||d.value||payload[0].value||0))
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+const TABS=["Consolidado","Alertas","Comparativa","Activos","Comitentes","Buscador"];
+
+function App(){
+  const [data,setData]=useState([]);
+  const [loading,setLoading]=useState(false);
+  const [prog,setProg]=useState(0);
+  const [log,setLog]=useState("");
+  const [drag,setDrag]=useState(false);
+  const fileRef=useRef();
+
+  const [tab,setTab]=useState("Consolidado");
+  const [fTipo,setFTipo]=useState("");
+  const [fMon,setFMon]=useState("");
+  const [fCom,setFCom]=useState("");
+  const [fTick,setFTick]=useState("");
+  const [sCol,setSCol]=useState("ars");
+  const [sDir,setSDir]=useState(-1);
+  const [sTick,setSTick]=useState("");
+  const [sCom,setSCom]=useState("");
+  const [cmpA,setCmpA]=useState("");
+  const [cmpB,setCmpB]=useState("");
+
+  const total=useMemo(()=>SUM(data),[data]);
+
+  const handleFile=useCallback(async file=>{
+    if(!file||!file.name.endsWith(".pdf")){alert("Subí un PDF.");return;}
+    setLoading(true);setProg(0);setLog("Iniciando…");
+    try{
+      const rows=await parsePDF(file,setProg,setLog);
+      setData(rows);
+      if(rows.length){
+        const cs=[...new Set(rows.map(r=>r.comitente))].sort((a,b)=>+a-+b);
+        setCmpA(cs[0]||"");setCmpB(cs[1]||"");
+      }
+    }catch(e){setLog("Error: "+e.message);console.error(e);}
+    setLoading(false);
+  },[]);
+
+  const onDrop=e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0]);};
+
+  const TIPOS=useMemo(()=>[...new Set(data.map(r=>r.tipo))].sort(),[data]);
+  const MONS =useMemo(()=>[...new Set(data.map(r=>r.moneda))].sort(),[data]);
+  const COMS =useMemo(()=>[...new Set(data.map(r=>r.comitente))].sort((a,b)=>+a-+b),[data]);
+  const TICKS=useMemo(()=>[...new Set(data.map(r=>r.ticker))].sort(),[data]);
+
+  const fil=useMemo(()=>data.filter(r=>{
+    if(fTipo&&r.tipo!==fTipo)return false;
+    if(fMon&&r.moneda!==fMon)return false;
+    if(fCom&&r.comitente!==fCom)return false;
+    if(fTick&&r.ticker!==fTick)return false;
+    return true;
+  }),[data,fTipo,fMon,fCom,fTick]);
+
+  const totFil=useMemo(()=>SUM(fil),[fil]);
+  const nCom=useMemo(()=>[...new Set(fil.map(r=>r.comitente))].length,[fil]);
+  const nTick=useMemo(()=>[...new Set(fil.map(r=>r.ticker))].length,[fil]);
+
+  const byTipo=useMemo(()=>{
+    const m={};fil.forEach(r=>{m[r.tipo]=(m[r.tipo]||0)+r.ars;});
+    return Object.entries(m).map(([tipo,ars])=>({tipo,name:tipo,ars,value:ars,pct:ars/total})).sort((a,b)=>b.ars-a.ars);
+  },[fil,total]);
+
+  const byTicker=useMemo(()=>{
+    const m={};fil.forEach(r=>{
+      if(!m[r.ticker])m[r.ticker]={ticker:r.ticker,nombre:r.nombre,tipo:r.tipo,moneda:r.moneda,ars:0,cs:new Set()};
+      m[r.ticker].ars+=r.ars;m[r.ticker].cs.add(r.comitente);
+    });
+    return Object.values(m).map(x=>({...x,nC:x.cs.size})).sort((a,b)=>{
+      const v=sDir;
+      if(sCol==="ars")return(b.ars-a.ars)*v;
+      if(sCol==="ticker")return a.ticker.localeCompare(b.ticker)*v;
+      if(sCol==="nC")return(b.nC-a.nC)*v;
+      return 0;
+    });
+  },[fil,sCol,sDir]);
+
+  const byCom=useMemo(()=>{
+    const m={};fil.forEach(r=>{
+      if(!m[r.comitente])m[r.comitente]={c:r.comitente,ars:0,ts:new Set(),tp:new Set()};
+      m[r.comitente].ars+=r.ars;m[r.comitente].ts.add(r.ticker);m[r.comitente].tp.add(r.tipo);
+    });
+    return Object.values(m).map(x=>({...x,nT:x.ts.size,nP:x.tp.size})).sort((a,b)=>b.ars-a.ars);
+  },[fil]);
+
+  const alerts=useMemo(()=>{
+    const res=[],cm={};
+    data.filter(r=>r.ars>0).forEach(r=>{
+      if(!cm[r.comitente])cm[r.comitente]={total:0,tickers:{},tipos:{},cash:0};
+      cm[r.comitente].total+=r.ars;
+      cm[r.comitente].tickers[r.ticker]=(cm[r.comitente].tickers[r.ticker]||0)+r.ars;
+      cm[r.comitente].tipos[r.tipo]=(cm[r.comitente].tipos[r.tipo]||0)+r.ars;
+      if(r.tipo==="Cash")cm[r.comitente].cash+=r.ars;
+    });
+    Object.entries(cm).forEach(([c,d])=>{
+      if(d.total<500000)return;
+      Object.entries(d.tickers).forEach(([tk,v])=>{
+        const p=v/d.total;
+        if(p>=.20)res.push({level:"danger",text:`Comitente ${c}: ${(p*100).toFixed(0)}% en ${tk} (${FMT2(v)})`,total:d.total});
+      });
+      Object.entries(d.tipos).forEach(([tp,v])=>{
+        const p=v/d.total;
+        if(p>=.50&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: ${(p*100).toFixed(0)}% en ${tp} (${FMT2(v)})`,total:d.total});
+      });
+      const cp=d.cash/d.total;
+      if(cp>=.40&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: ${(cp*100).toFixed(0)}% en efectivo (${FMT2(d.cash)})`,total:d.total});
+      const nt=Object.keys(d.tickers).length;
+      if(nt<=3&&d.total>5e6)res.push({level:"warn",text:`Comitente ${c}: solo ${nt} instrumento${nt!==1?"s":""} (${FMT2(d.total)})`,total:d.total});
+    });
+    return res.sort((a,b)=>(b.level==="danger"?1:0)-(a.level==="danger"?1:0)||(b.total-a.total));
+  },[data]);
+
+  const dCnt=alerts.filter(a=>a.level==="danger").length;
+  const wCnt=alerts.filter(a=>a.level==="warn").length;
+
+  const buildProf=c=>{
+    const rows=data.filter(r=>r.comitente===c&&r.ars>0);
+    const tot=SUM(rows);
+    const byT={};rows.forEach(r=>{byT[r.tipo]=(byT[r.tipo]||0)+r.ars;});
+    const tipos=["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"];
+    return{tot,rows,byT,
+      radar:tipos.map(t=>({subject:t,value:Math.round(((byT[t]||0)/tot)*100||0)})),
+      top5:[...rows].sort((a,b)=>b.ars-a.ars).slice(0,5),
+      nT:[...new Set(rows.map(r=>r.ticker))].length,
+      cashP:(byT["Cash"]||0)/tot
+    };
+  };
+  const pA=useMemo(()=>cmpA?buildProf(cmpA):null,[cmpA,data]);
+  const pB=useMemo(()=>cmpB?buildProf(cmpB):null,[cmpB,data]);
+  const radD=useMemo(()=>pA&&pB?pA.radar.map((d,i)=>({subject:d.subject,A:d.value,B:pB.radar[i]?.value||0})):[],[pA,pB]);
+
+  const tickRes=useMemo(()=>{
+    if(!sTick.trim())return[];
+    const q=sTick.trim().toUpperCase();
+    const m={};
+    data.filter(r=>r.ars>0&&(r.ticker.toUpperCase().includes(q)||r.nombre.toUpperCase().includes(q))).forEach(r=>{
+      if(!m[r.comitente])m[r.comitente]={c:r.comitente,ars:0,items:[]};
+      m[r.comitente].ars+=r.ars;m[r.comitente].items.push(r);
+    });
+    return Object.values(m).sort((a,b)=>b.ars-a.ars);
+  },[sTick,data]);
+
+  const comRes=useMemo(()=>sCom?data.filter(r=>r.comitente===sCom&&r.ars>0).sort((a,b)=>b.ars-a.ars):[],[sCom,data]);
+  const comTot=useMemo(()=>SUM(comRes),[comRes]);
+
+  const clearAll=()=>{setFTipo("");setFMon("");setFCom("");setFTick("");};
+  const chips=[
+    fTipo&&{l:"Tipo: "+fTipo,c:()=>setFTipo("")},
+    fMon&&{l:"Moneda: "+fMon,c:()=>setFMon("")},
+    fCom&&{l:"Cte: "+fCom,c:()=>setFCom("")},
+    fTick&&{l:"Ticker: "+fTick,c:()=>setFTick("")},
+  ].filter(Boolean);
+
+  const sh=(col,lbl)=>h("span",{className:"srow",
+    onClick:()=>{if(sCol===col)setSDir(d=>-d);else{setSCol(col);setSDir(-1);}},
+    style:{color:sCol===col?"var(--text)":"var(--text2)"}
+  },lbl+(sCol===col?(sDir===-1?" ↓":" ↑"):""));
+
+  // ── pantalla carga ──
+  if(!data.length){
+    return h(Fragment,null,
+      h("h1",null,"Dashboard Carteras"),
+      h("p",{className:"sub"},"Capital Markets Argentina — subí el reporte de valuación en PDF"),
+      h("div",{
+        className:"upload"+(drag?" drag":""),
+        onClick:()=>fileRef.current.click(),
+        onDragOver:e=>{e.preventDefault();setDrag(true);},
+        onDragLeave:()=>setDrag(false),
+        onDrop
+      },
+        h("div",{className:"upicon"},"📄"),
+        h("div",{className:"uptitle"},"Arrastrá el PDF acá o hacé click para seleccionarlo"),
+        h("div",{className:"upsub"},"Reporte de Valuación CMA (.pdf) — cualquier fecha"),
+        loading&&h(Fragment,null,
+          h("div",{className:"pbg"},h("div",{className:"pfill",style:{width:prog+"%"}})),
+          h("div",{className:"plog"},log)
+        )
+      ),
+      h("input",{ref:fileRef,type:"file",accept:".pdf",style:{display:"none"},onChange:e=>handleFile(e.target.files[0])})
+    );
+  }
+
+  // ── dashboard ──
+  const filterBox=h("div",{className:"fbox"},
+    h("div",{style:{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}},
+      ...[["Tipo",TIPOS,fTipo,setFTipo],["Moneda",MONS,fMon,setFMon]].map(([lbl,opts,val,set])=>
+        h("div",{key:lbl,style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+          h("label",{style:{fontSize:11,color:"var(--text2)"}},lbl),
+          h("select",{value:val,onChange:e=>set(e.target.value),style:{width:"auto"}},
+            h("option",{value:""},"Todos"),
+            ...opts.map(o=>h("option",{key:o,value:o},o))
+          )
+        )
+      ),
+      h("div",{style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+        h("label",{style:{fontSize:11,color:"var(--text2)"}},"Comitente"),
+        h("select",{value:fCom,onChange:e=>setFCom(e.target.value),style:{width:"auto"}},
+          h("option",{value:""},"Todos"),
+          ...COMS.map(c=>h("option",{key:c,value:c},c))
+        )
+      ),
+      h("div",{style:{display:"flex",flexDirection:"column",gap:3,minWidth:120}},
+        h("label",{style:{fontSize:11,color:"var(--text2)"}},"Ticker"),
+        h("select",{value:fTick,onChange:e=>setFTick(e.target.value),style:{width:"auto"}},
+          h("option",{value:""},"Todos"),
+          ...TICKS.map(t=>h("option",{key:t,value:t},t))
+        )
+      ),
+      chips.length&&h("button",{onClick:clearAll,style:{alignSelf:"flex-end",height:30}},"Limpiar")
+    ),
+    chips.length&&h("div",{style:{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}},
+      ...chips.map((ch,i)=>h("span",{key:i,className:"chip"},ch.l,h("button",{onClick:ch.c},"×")))
+    )
+  );
+
+  const metricsRow=h("div",{className:"metrics"},
+    h(MetricCard,{label:"Valuación filtrada",value:FMT2(totFil),sub:total>0?((totFil/total*100).toFixed(1)+"% del total"):""}),
+    h(MetricCard,{label:"Comitentes",value:nCom,sub:"en la selección"}),
+    h(MetricCard,{label:"Instrumentos",value:nTick,sub:"tickers únicos"}),
+    h(MetricCard,{label:"Alertas críticas",value:dCnt,sub:`+ ${wCnt} advertencias`,danger:dCnt>0,warn:dCnt===0&&wCnt>0})
+  );
+
+  const tabBar=h("div",{className:"tab-bar"},
+    ...TABS.map(t=>h("button",{key:t,className:"tab"+(tab===t?" active":""),onClick:()=>setTab(t)},
+      t+(t==="Alertas"&&dCnt>0?` (${dCnt})`:"")
+    ))
+  );
+
+  // contenido por tab
+  let content;
+
+  if(tab==="Consolidado"){
+    content=h(Fragment,null,
+      h("div",{className:"g2",style:{marginBottom:20}},
+        h("div",null,
+          h("div",{className:"stitle"},"Distribución por clase"),
+          h(RC.ResponsiveContainer,{width:"100%",height:240},
+            h(RC.PieChart,null,
+              h(RC.Pie,{data:byTipo,dataKey:"value",cx:"50%",cy:"50%",outerRadius:100,innerRadius:48,paddingAngle:1},
+                ...byTipo.map(d=>h(RC.Cell,{key:d.tipo,fill:TC[d.tipo]||"#888"}))
+              ),
+              h(RC.Tooltip,{content:h(CTip,null)})
+            )
+          ),
+          h("div",{className:"leg"},
+            ...byTipo.map(d=>h("span",{key:d.tipo,className:"legitem",
+              onClick:()=>setFTipo(d.tipo===fTipo?"":d.tipo),
+              style:{fontWeight:fTipo===d.tipo?500:400,color:fTipo===d.tipo?"var(--text)":"var(--text2)"}},
+              h("span",{className:"dot",style:{background:TC[d.tipo]||"#888"}}),
+              d.tipo+" "+PCT(d.pct)
+            ))
+          )
+        ),
+        h("div",null,
+          h("div",{className:"stitle"},"Top 10 comitentes"),
+          h(RC.ResponsiveContainer,{width:"100%",height:240},
+            h(RC.BarChart,{data:byCom.slice(0,10),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tickFormatter:v=>"$"+(v/1e9).toFixed(1)+"B",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[FMT(v),"ARS"]}),
+              h(RC.Bar,{dataKey:"ars",fill:"#378ADD",radius:[0,3,3,0],
+                onClick:d=>{setFCom(d.c===fCom?"":d.c);setTab("Activos");}})
+            )
+          ),
+          h("div",{style:{fontSize:10,color:"var(--text3)",marginTop:2}},"Click en barra → filtrar y ver activos")
+        )
+      ),
+      h("div",{className:"stitle"},"Resumen por clase"),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Clase","Valuación ARS","% cartera","Posiciones","Comitentes"].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...byTipo.map(d=>{
+            const rows=fil.filter(r=>r.tipo===d.tipo&&r.ars>0);
+            const coms=[...new Set(rows.map(r=>r.comitente))].length;
+            return h("tr",{key:d.tipo,style:{cursor:"pointer"},onClick:()=>setFTipo(d.tipo===fTipo?"":d.tipo)},
+              h("td",{style:{display:"flex",alignItems:"center",gap:6}},h("span",{className:"dot",style:{background:TC[d.tipo]||"#888"}}),d.tipo),
+              h("td",{style:{fontWeight:500}},FMT(d.ars)),
+              h("td",{style:{color:"var(--text2)"}},PCT(d.pct)),
+              h("td",{style:{color:"var(--text2)"}},rows.length),
+              h("td",{style:{color:"var(--text2)"}},coms)
+            );
+          }))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Alertas"){
+    const topConc=(()=>{
+      const cm2={};
+      data.filter(r=>r.ars>0).forEach(r=>{
+        if(!cm2[r.comitente])cm2[r.comitente]={total:0,tickers:{}};
+        cm2[r.comitente].total+=r.ars;
+        cm2[r.comitente].tickers[r.ticker]=(cm2[r.comitente].tickers[r.ticker]||0)+r.ars;
+      });
+      return Object.entries(cm2).filter(([,d])=>d.total>1e6).map(([c,d])=>{
+        const e=Object.entries(d.tickers).sort((a,b)=>b[1]-a[1])[0];
+        return{c,pct:e[1]/d.total,ticker:e[0],total:d.total};
+      }).sort((a,b)=>b.pct-a.pct).slice(0,10);
+    })();
+
+    content=h(Fragment,null,
+      h("div",{className:"metrics"},
+        h(MetricCard,{label:"Alertas críticas",value:dCnt,sub:"Concentración > 20% en un activo",danger:dCnt>0}),
+        h(MetricCard,{label:"Advertencias",value:wCnt,sub:"Concentración tipo, cash, diversif.",warn:wCnt>0}),
+        h(MetricCard,{label:"Comitentes analizados",value:byCom.length,sub:"posición > $500k"})
+      ),
+      h("div",{className:"stitle",style:{color:"var(--danger-text)"}},"Concentración crítica — activo individual > 20%"),
+      ...(!dCnt?[h("p",{style:{fontSize:12,color:"var(--text2)",marginBottom:16}},"Sin alertas críticas.")]:
+        alerts.filter(a=>a.level==="danger").map((a,i)=>h(AlertBadge,{key:i,...a}))),
+      h("div",{className:"stitle",style:{color:"var(--warn-text)",marginTop:16}},"Advertencias"),
+      ...(!wCnt?[h("p",{style:{fontSize:12,color:"var(--text2)"}},"Sin advertencias.")]:
+        alerts.filter(a=>a.level==="warn").slice(0,40).map((a,i)=>h(AlertBadge,{key:i,...a}))),
+      h("div",{className:"stitle",style:{marginTop:20}},"Top 10 — concentración máxima en un activo"),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Comitente","Activo","Concentración","Cartera total"].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...topConc.map((d,i)=>h("tr",{key:d.c},
+            h("td",{style:{fontWeight:500}},d.c),
+            h("td",null,d.ticker),
+            h("td",null,
+              h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                h("div",{style:{width:60,height:5,borderRadius:2,background:"var(--bg3)",overflow:"hidden"}},
+                  h("div",{style:{width:`${Math.min(100,d.pct*100)}%`,height:"100%",borderRadius:2,
+                    background:d.pct>=.5?"var(--danger-text)":d.pct>=.2?"var(--warn-text)":"var(--ok)"}})
+                ),
+                h("span",{style:{fontWeight:d.pct>=.2?500:400,
+                  color:d.pct>=.5?"var(--danger-text)":d.pct>=.2?"var(--warn-text)":"var(--text)"}},
+                  (d.pct*100).toFixed(0)+"%"
+                )
+              )
+            ),
+            h("td",{style:{color:"var(--text2)"}},FMT2(d.total))
+          )))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Comparativa"){
+    content=h(Fragment,null,
+      h("div",{style:{display:"flex",gap:12,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end"}},
+        ...[[cmpA,setCmpA,"#378ADD","Comitente A"],[cmpB,setCmpB,"#D4537E","Comitente B"]].map(([val,set,col,lbl])=>
+          h("div",{key:lbl,style:{display:"flex",flexDirection:"column",gap:3}},
+            h("label",{style:{fontSize:11,color:col,fontWeight:500}},lbl),
+            h("select",{value:val,onChange:e=>set(e.target.value),style:{minWidth:140,width:"auto"}},
+              h("option",{value:""},"Seleccionar…"),
+              ...COMS.map(c=>h("option",{key:c,value:c},c))
+            )
+          )
+        )
+      ),
+      pA&&pB&&h(Fragment,null,
+        h("div",{className:"g2",style:{marginBottom:16}},
+          ...[[pA,"#378ADD",cmpA],[pB,"#D4537E",cmpB]].map(([prof,col,c])=>
+            h("div",{key:c,style:{background:"var(--bg2)",borderRadius:"var(--rl)",padding:"14px 16px"}},
+              h("div",{style:{fontSize:12,color:col,fontWeight:500,marginBottom:10}},`Comitente ${c}`),
+              h("div",{className:"metrics",style:{marginBottom:10}},
+                h(MetricCard,{label:"Total ARS",value:FMT2(prof.tot),sub:""}),
+                h(MetricCard,{label:"Instr.",value:prof.nT,sub:""}),
+                h(MetricCard,{label:"Cash",value:`${(prof.cashP*100).toFixed(0)}%`,sub:"",warn:prof.cashP>.4})
+              ),
+              h("div",{style:{fontSize:11,color:"var(--text2)",marginBottom:6}},"Top 5 posiciones"),
+              ...prof.top5.map((r,i)=>
+                h("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,padding:"3px 0",borderBottom:".5px solid var(--border)"}},
+                  h("span",{style:{display:"flex",alignItems:"center",gap:5}},
+                    h("span",{className:"dot",style:{background:TC[r.tipo]||"#888",width:6,height:6}}),
+                    h("span",{style:{fontWeight:500}},r.ticker),
+                    h("span",{style:{color:"var(--text3)"}},r.tipo)
+                  ),
+                  h("span",null,FMT2(r.ars)," ",h("span",{style:{color:"var(--text3)"}},`${((r.ars/prof.tot)*100).toFixed(0)}%`))
+                )
+              )
+            )
+          )
+        ),
+        h("div",{className:"stitle"},"Perfil de asignación — radar"),
+        h(RC.ResponsiveContainer,{width:"100%",height:300},
+          h(RC.RadarChart,{data:radD},
+            h(RC.PolarGrid,{stroke:"var(--border2)"}),
+            h(RC.PolarAngleAxis,{dataKey:"subject",tick:{fontSize:10,fill:"var(--text2)"}}),
+            h(RC.Radar,{name:`Cte ${cmpA}`,dataKey:"A",stroke:"#378ADD",fill:"#378ADD",fillOpacity:.15}),
+            h(RC.Radar,{name:`Cte ${cmpB}`,dataKey:"B",stroke:"#D4537E",fill:"#D4537E",fillOpacity:.15}),
+            h(RC.Legend,{wrapperStyle:{fontSize:12}}),
+            h(RC.Tooltip,{formatter:(v,n)=>[v+"%",n]})
+          )
+        ),
+        h("div",{className:"stitle",style:{marginTop:16}},"Diferencia por clase (pp)"),
+        h("div",{className:"sx"},
+          h("table",null,
+            h("thead",null,h("tr",null,...["Clase",`Cte ${cmpA}`,`Cte ${cmpB}`,"Diferencia"].map(hd=>h("th",{key:hd},hd)))),
+            h("tbody",null,
+              ...["Cash","Acciones ARG","CEDEAR","Acc. Exterior","Bono Soberano","ON","Tít. Provincial","FCI","Letra","Tít. Público"]
+                .map(t=>({t,a:(pA.byT[t]||0)/pA.tot*100,b:(pB.byT[t]||0)/pB.tot*100}))
+                .filter(d=>d.a>0||d.b>0)
+                .sort((a,b)=>Math.abs(b.a-b.b)-Math.abs(a.a-a.b))
+                .map((d,i)=>{
+                  const delta=d.a-d.b;
+                  return h("tr",{key:d.t},
+                    h("td",{style:{display:"flex",alignItems:"center",gap:5}},h("span",{className:"dot",style:{background:TC[d.t]||"#888"}}),d.t),
+                    h("td",{style:{color:"#378ADD",fontWeight:500}},d.a.toFixed(1)+"%"),
+                    h("td",{style:{color:"#D4537E",fontWeight:500}},d.b.toFixed(1)+"%"),
+                    h("td",{style:{fontWeight:500,color:Math.abs(delta)>10?"var(--danger-text)":Math.abs(delta)>5?"var(--warn-text)":"var(--text2)"}},
+                      (delta>0?"+":"")+delta.toFixed(1)+"pp")
+                  );
+                })
+            )
+          )
+        )
+      )
+    );
+  }
+
+  else if(tab==="Activos"){
+    content=h(Fragment,null,
+      h("div",{className:"stitle"},`${byTicker.length} instrumentos`),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,
+            h("th",null,sh("ticker","Ticker")),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Nombre"),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Tipo"),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"Mon."),
+            h("th",null,sh("ars","ARS")),
+            h("th",null,sh("nC","Ctes.")),
+            h("th",{style:{color:"var(--text2)",fontWeight:500}},"% total"),
+            h("th",null)
+          )),
+          h("tbody",null,...byTicker.map((d,i)=>
+            h("tr",{key:d.ticker+i},
+              h("td",{style:{fontWeight:500}},d.ticker),
+              h("td",{style:{color:"var(--text2)",maxWidth:150,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},d.nombre),
+              h("td",null,h("span",{style:{display:"inline-flex",alignItems:"center",gap:4,fontSize:11}},
+                h("span",{className:"dot",style:{background:TC[d.tipo]||"#888",width:6,height:6}}),d.tipo)),
+              h("td",{style:{fontSize:11,color:"var(--text2)"}},d.moneda),
+              h("td",null,FMT(d.ars)),
+              h("td",{style:{textAlign:"center",color:"var(--text2)"}},d.nC),
+              h("td",{style:{color:"var(--text3)"}},total>0?((d.ars/total)*100).toFixed(2)+"%":""),
+              h("td",null,h("button",{onClick:()=>setFTick(d.ticker===fTick?"":d.ticker)},d.ticker===fTick?"✓":"Filtrar"))
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Comitentes"){
+    content=h(Fragment,null,
+      h("div",{className:"g2",style:{marginBottom:16}},
+        h("div",null,
+          h("div",{className:"stitle"},"Top 15 por valuación"),
+          h(RC.ResponsiveContainer,{width:"100%",height:340},
+            h(RC.BarChart,{data:byCom.slice(0,15),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tickFormatter:v=>"$"+(v/1e9).toFixed(1)+"B",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[FMT(v),"ARS"]}),
+              h(RC.Bar,{dataKey:"ars",fill:"#1D9E75",radius:[0,3,3,0],onClick:d=>setFCom(d.c===fCom?"":d.c)})
+            )
+          )
+        ),
+        h("div",null,
+          h("div",{className:"stitle"},"Top 15 por diversificación"),
+          h(RC.ResponsiveContainer,{width:"100%",height:340},
+            h(RC.BarChart,{data:[...byCom].sort((a,b)=>b.nT-a.nT).slice(0,15),layout:"vertical",margin:{left:4,right:16}},
+              h(RC.CartesianGrid,{strokeDasharray:"3 3",stroke:"var(--border)",horizontal:false}),
+              h(RC.XAxis,{type:"number",tick:{fontSize:9,fill:"var(--text3)"}}),
+              h(RC.YAxis,{type:"category",dataKey:"c",tick:{fontSize:10,fill:"var(--text3)"},width:46}),
+              h(RC.Tooltip,{formatter:v=>[v+" instr.","Diversif."]}),
+              h(RC.Bar,{dataKey:"nT",fill:"#7F77DD",radius:[0,3,3,0]})
+            )
+          )
+        )
+      ),
+      h("div",{className:"sx"},
+        h("table",null,
+          h("thead",null,h("tr",null,...["Comitente","Valuación ARS","% total","Instr.","Clases",""].map(hd=>h("th",{key:hd},hd)))),
+          h("tbody",null,...byCom.map((d,i)=>
+            h("tr",{key:d.c,style:{background:fCom===d.c?"var(--info-bg)":i%2===1?"var(--bg2)":"transparent"}},
+              h("td",{style:{fontWeight:500}},d.c),
+              h("td",null,
+                h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                  h("div",{style:{width:44,height:4,borderRadius:2,background:"var(--bg3)",overflow:"hidden",flexShrink:0}},
+                    h("div",{style:{width:`${Math.max(2,(d.ars/byCom[0].ars)*100)}%`,height:"100%",background:"#1D9E75",borderRadius:2}})
+                  ),
+                  FMT2(d.ars)
+                )
+              ),
+              h("td",{style:{color:"var(--text2)"}},total>0?((d.ars/total)*100).toFixed(2)+"%":""),
+              h("td",{style:{textAlign:"center"}},d.nT),
+              h("td",{style:{textAlign:"center"}},d.nP),
+              h("td",null,h("button",{
+                onClick:()=>setFCom(d.c===fCom?"":d.c),
+                style:{background:fCom===d.c?"var(--info-bg)":"transparent",color:fCom===d.c?"var(--info-text)":"var(--text2)"}
+              },fCom===d.c?"✓ Activo":"Ver"))
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  else if(tab==="Buscador"){
+    const comPie=(()=>{
+      const m={};comRes.forEach(r=>{m[r.tipo]=(m[r.tipo]||0)+r.ars;});
+      return Object.entries(m).map(([tipo,ars])=>({tipo,name:tipo,value:ars})).sort((a,b)=>b.value-a.value);
+    })();
+
+    content=h("div",{className:"g2"},
+      h("div",null,
+        h("div",{className:"stitle"},"¿Qué clientes tienen este activo?"),
+        h("input",{value:sTick,onChange:e=>setSTick(e.target.value),placeholder:"Ticker o nombre… ej: SPY, AL35, YPF, USD",style:{marginBottom:8}}),
+        h("div",{style:{display:"flex",flexWrap:"wrap",gap:5,marginBottom:10}},
+          ...["USD","USD Cable","SPY","MELI","AL35","VIST","GGAL","IRCPO"].map(tk=>
+            h("button",{key:tk,onClick:()=>setSTick(sTick===tk?"":tk),
+              style:{fontSize:10,padding:"2px 8px",borderRadius:999,
+                background:sTick===tk?"var(--info-bg)":"var(--bg2)",
+                color:sTick===tk?"var(--info-text)":"var(--text2)"}},tk)
+          )
+        ),
+        sTick.trim()&&(
+          !tickRes.length
+            ?h("p",{style:{fontSize:12,color:"var(--text3)"}},`Sin resultados para "${sTick}"`)
+            :h(Fragment,null,
+              h("div",{style:{fontSize:11,color:"var(--text2)",marginBottom:6}},
+                `${tickRes.length} comitente${tickRes.length!==1?"s":""} · ${FMT2(tickRes.reduce((s,r)=>s+r.ars,0))}`
+              ),
+              h("div",{style:{maxHeight:400,overflowY:"auto"}},
+                ...tickRes.map((d,i)=>
+                  h("div",{key:d.c,style:{padding:"7px 10px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:4,marginBottom:2,fontSize:12}},
+                    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
+                      h("span",{style:{fontWeight:500}},`Comitente ${d.c}`),
+                      h("span",{style:{color:"var(--text2)"}},FMT2(d.ars))
+                    ),
+                    h("div",{style:{display:"flex",flexWrap:"wrap",gap:3}},
+                      ...[...new Map(d.items.map(x=>[x.ticker,x])).values()].map(it=>
+                        h("span",{key:it.ticker,style:{fontSize:10,background:"var(--bg3)",border:".5px solid var(--border)",borderRadius:3,padding:"1px 5px",color:"var(--text2)"}},
+                          `${it.ticker} ${FMT2(it.ars)}`)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+        )
+      ),
+      h("div",null,
+        h("div",{className:"stitle"},"Cartera de un comitente"),
+        h("select",{value:sCom,onChange:e=>setSCom(e.target.value),style:{marginBottom:12}},
+          h("option",{value:""},"Seleccionar comitente…"),
+          ...COMS.map(c=>h("option",{key:c,value:c},c))
+        ),
+        sCom&&comRes.length>0&&h(Fragment,null,
+          h("div",{className:"metrics",style:{marginBottom:10}},
+            h(MetricCard,{label:"Total ARS",value:FMT2(comTot),sub:total>0?`${((comTot/total)*100).toFixed(2)}% del libro`:""}),
+            h(MetricCard,{label:"Posiciones",value:comRes.length,sub:"activos"})
+          ),
+          comPie.length>0&&h("div",{style:{display:"flex",gap:12,alignItems:"center",marginBottom:10}},
+            h(RC.ResponsiveContainer,{width:90,height:90},
+              h(RC.PieChart,null,
+                h(RC.Pie,{data:comPie,dataKey:"value",cx:"50%",cy:"50%",outerRadius:40,innerRadius:18,paddingAngle:1},
+                  ...comPie.map(d=>h(RC.Cell,{key:d.tipo,fill:TC[d.tipo]||"#888"}))
+                ),
+                h(RC.Tooltip,{content:h(CTip,null)})
+              )
+            ),
+            h("div",{style:{display:"flex",flexDirection:"column",gap:3}},
+              ...comPie.map(d=>h("span",{key:d.tipo,style:{fontSize:10,display:"flex",alignItems:"center",gap:4,color:"var(--text2)"}},
+                h("span",{className:"dot",style:{background:TC[d.tipo]||"#888",width:6,height:6}}),
+                `${d.tipo} ${((d.value/comTot)*100).toFixed(0)}%`
+              ))
+            )
+          ),
+          h("div",{style:{maxHeight:300,overflowY:"auto"}},
+            ...comRes.map((r,i)=>
+              h("div",{key:i,style:{display:"flex",justifyContent:"space-between",alignItems:"center",
+                padding:"5px 8px",background:i%2===0?"var(--bg2)":"transparent",borderRadius:3,marginBottom:1,fontSize:12}},
+                h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+                  h("span",{className:"dot",style:{background:TC[r.tipo]||"#888",width:6,height:6}}),
+                  h("div",null,
+                    h("span",{style:{fontWeight:500}},r.ticker),
+                    h("span",{style:{fontSize:10,color:"var(--text3)",marginLeft:5}},`${r.tipo} · ${r.moneda}`)
+                  )
+                ),
+                h("div",{style:{textAlign:"right"}},
+                  h("div",null,FMT2(r.ars)),
+                  h("div",{style:{fontSize:10,color:"var(--text3)"}},`${((r.ars/comTot)*100).toFixed(1)}%`)
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
+  return h(Fragment,null,
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2,flexWrap:"wrap",gap:8}},
+      h("div",null,
+        h("h1",null,"Dashboard Carteras"),
+        h("p",{className:"sub"},`Capital Markets Argentina · ${data.length} posiciones · ${COMS.length} comitentes · Total: ${FMT2(total)}`)
+      ),
+      h("button",{onClick:()=>{setData([]);setLog("");setProg(0);}},"Cargar nuevo PDF")
+    ),
+    filterBox,
+    metricsRow,
+    tabBar,
+    content
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(h(App,null));
+</script>
+</body>
+</html>
